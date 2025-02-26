@@ -1,0 +1,2 @@
+D:/FSB/capstone/tien_giang_mystic/android/app/.cxx/Debug/506g03i6/x86/CMakeFiles/edit_cache.dir
+D:/FSB/capstone/tien_giang_mystic/android/app/.cxx/Debug/506g03i6/x86/CMakeFiles/rebuild_cache.dir
