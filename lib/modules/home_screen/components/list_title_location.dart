@@ -9,11 +9,14 @@ class ListLocationTitle extends StatelessWidget {
   final String title;
   final String? subTitle;
   final List listLocation;
-  const ListLocationTitle(
-      {super.key,
-      required this.title,
-      this.subTitle = "",
-      required this.listLocation});
+  final VoidCallback? onClickSubtitle;
+  const ListLocationTitle({
+    super.key,
+    required this.title,
+    this.subTitle = "",
+    required this.listLocation,
+    this.onClickSubtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +36,16 @@ class ListLocationTitle extends StatelessWidget {
               ),
             ),
             if (subTitle != null)
-              Text(
-                subTitle ?? "",
-                style: TextStyle(
-                  fontSize: responsive.fontSize.small + 2,
-                  color: ThemeColor.blue1,
+              TextButton(
+                onPressed: onClickSubtitle,
+                child: Text(
+                  subTitle ?? "",
+                  style: TextStyle(
+                    fontSize: responsive.fontSize.small + 2,
+                    color: ThemeColor.blue1,
+                  ),
                 ),
-              ),
+              )
           ],
         ),
       ),

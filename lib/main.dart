@@ -2,6 +2,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:tien_giang_mystic/themes/colors_theme.dart';
 import 'package:tien_giang_mystic/utils/images.dart';
 
 import 'main_binding.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
 
 class MainScreen extends StatelessWidget {
   final MainController controller = Get.put(MainController());
+  final responsive = Get.find<Responsive>();
   final PersistentTabController _tabController =
       PersistentTabController(initialIndex: 0);
 
@@ -58,23 +60,23 @@ class MainScreen extends StatelessWidget {
     return [
       PersistentBottomNavBarItem(
         icon: ImageIcon(
-          AssetImage(Images.tgicon),
-          color: Color(0xFF3A5A98),
+          AssetImage(Images.menuUnactive),
         ),
-        activeColorPrimary: Colors.blue,
+        activeColorPrimary: ThemeColor.blue1,
         inactiveColorPrimary: Colors.grey,
       ),
       PersistentBottomNavBarItem(
         icon: ImageIcon(
-          AssetImage(Images.tgicon),
-          color: Color(0xFF3A5A98),
+          AssetImage(Images.chatUnactive),
         ),
-        activeColorPrimary: Colors.blue,
+        activeColorPrimary: ThemeColor.blue1,
         inactiveColorPrimary: Colors.grey,
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.person),
-        activeColorPrimary: Colors.blue,
+        icon: ImageIcon(
+          AssetImage(Images.profileUnactive),
+        ),
+        activeColorPrimary: ThemeColor.blue1,
         inactiveColorPrimary: Colors.grey,
       ),
     ];
@@ -92,6 +94,7 @@ class MainScreen extends StatelessWidget {
       resizeToAvoidBottomInset: true,
       stateManagement: true,
       navBarStyle: NavBarStyle.style3,
+      navBarHeight: responsive.width * 0.14,
     );
   }
 }

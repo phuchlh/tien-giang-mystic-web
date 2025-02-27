@@ -80,4 +80,8 @@ class HomeScreenController extends GetxController {
       return 'Good Evening';
     }
   }
+
+  void onClickViewMore() {
+    print("123123123");
+  }
 }
