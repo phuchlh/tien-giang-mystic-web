@@ -6,6 +6,7 @@ import 'package:tien_giang_mystic/modules/login_screen/login_screen_page.dart';
 import 'package:tien_giang_mystic/modules/profile_screen/profile_screen_binding.dart';
 import 'package:tien_giang_mystic/modules/profile_screen/profile_screen_page.dart';
 import 'package:tien_giang_mystic/route/app_routes.dart';
+import 'package:tien_giang_mystic/utils/images.dart';
 
 class HomeScreenController extends GetxController {
   static HomeScreenController get to => Get.find();
@@ -29,6 +30,19 @@ class HomeScreenController extends GetxController {
   void onCheckStartingUp() {
     print('Starting up');
   }
+
+  final topDestinations = [
+    {
+      "image": Images.tgicon,
+      "title": "Venice",
+      "location": "Veneto Region, Italy"
+    },
+    {
+      "image": Images.tgicon,
+      "title": "Mount Fuji",
+      "location": "Central Honshu, Japan"
+    },
+  ];
 
   final placesData = [
     PlaceModel(
@@ -54,4 +68,16 @@ class HomeScreenController extends GetxController {
     PlaceModel(
         id: 8, category: "Khu tưởng niệm", icon: "assets/icons/memorial.svg"),
   ];
+
+  String getTimeNow() {
+    final now = DateTime.now();
+    final hour = now.hour;
+    if (hour < 12) {
+      return 'Good Morning';
+    } else if (hour < 18) {
+      return 'Good Afternoon';
+    } else {
+      return 'Good Evening';
+    }
+  }
 }

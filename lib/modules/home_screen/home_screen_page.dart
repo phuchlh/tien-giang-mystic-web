@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tien_giang_mystic/modules/home_screen/home_screen_controller.dart';
-import 'package:tien_giang_mystic/utils/images.dart';
-import 'package:tien_giang_mystic/utils/responsive.dart';
-import 'package:tien_giang_mystic/themes/colors_theme.dart';
+import 'package:tien_giang_mystic/components/box_gap.dart';
+import 'package:tien_giang_mystic/modules/home_screen/components/list_title_location.dart';
+import 'home_screen_controller.dart';
+import '../../utils/images.dart';
+import '../../utils/responsive.dart';
+import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 
 class HomeScreenPage extends GetView<HomeScreenController> {
   const HomeScreenPage({super.key});
@@ -14,98 +16,101 @@ class HomeScreenPage extends GetView<HomeScreenController> {
 
     return GetBuilder<HomeScreenController>(
       builder: (controller) => Scaffold(
-        backgroundColor: const Color(0xFFE5F3FF), // Light blue background
+        backgroundColor: Colors.white,
         body: SafeArea(
-          child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(Images.backgroundTG1),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
+          child: KeyboardDismisser(
+            gestures: [
+              GestureType.onTap,
+              GestureType.onPanUpdateDownDirection,
+            ],
+            child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Main heading
-                  Text(
-                    'Where do\nyou want\nto be?',
-                    style: TextStyle(
-                      fontSize: responsive.fontSize.extraLarge,
-                      fontWeight: FontWeight.bold,
-                      height: 1.2,
-                    ),
+                  // Header với hình nền và Avatar
+                  Stack(
+                    children: [
+                      Container(
+                        height: Get.height * 0.43,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage(Images.backgroundTG1),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 280,
+                        left: 20,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              controller.getTimeNow(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: responsive.fontSize.small + 3,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              "Bạn đang có dự định gì?",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: responsive.fontSize.extraLarge,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 30),
 
-                  // Options
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: SizedBox(
-                        height: responsive.spacing(0.2),
-                        child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          scrollDirection: Axis.horizontal,
-                          shrinkWrap: true,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: controller.placesData.length,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(height: 15),
-                          itemBuilder: (context, index) {
-                            return _buildOptionButton(
-                              controller.placesData[index].category,
-                              [Color(0xFFFFFFFF), Color(0xFFCCCCCC)],
-                              Colors.black,
-                            );
-                          },
+                  // Search Box
+                  Padding(
+                    padding: EdgeInsets.all(responsive.spacing(0.03)),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Where are you going?',
+                          border: InputBorder.none,
+                          icon: Icon(Icons.search, color: Colors.grey),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildOptionButton(
-      String text, List<Color> gradientColors, Color textColor) {
-    return Container(
-      width: Get.width * 0.4, // 40% of screen width
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          borderRadius: BorderRadius.circular(20),
-          child: Center(
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                  // Top Destination
+                  ListLocationTitle(
+                    title: "Điểm đến hàng đầu",
+                    subTitle: "Xem tất cả",
+                    listLocation: controller.topDestinations,
+                  ),
+                  BoxGap(
+                    gapHeight: responsive.width * 0.1,
+                  ),
+                  ListLocationTitle(
+                    title: "Điểm đến hàng đầu",
+                    subTitle: "Xem tất cả",
+                    listLocation: controller.topDestinations,
+                  ),
+                  BoxGap(
+                    gapHeight: responsive.width * 0.1,
+                  ),
+                ],
               ),
             ),
           ),

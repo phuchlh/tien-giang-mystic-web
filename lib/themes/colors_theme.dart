@@ -23,6 +23,12 @@ class ThemeColor {
   static const Color inactive = Color(0xFF9E9E9E); // Grey for inactive icons
   static const Color background = Colors.white;
 
+  // blue
+  static const Color blue1 = Color(0xFF74c0fc);
+
+  // grey
+  static const Color grey1 = Color(0xFF495057);
+
   ThemeData get themeData {
     ColorScheme colorSchemeMovieApp = ColorScheme(
       primary: Color(0xff2E2739),

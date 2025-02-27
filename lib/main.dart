@@ -1,17 +1,16 @@
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
-import 'package:tien_giang_mystic/main_binding.dart';
-import 'package:tien_giang_mystic/main_controller.dart';
-import 'package:tien_giang_mystic/modules/chat_screen/chat_screen_page.dart';
-import 'package:tien_giang_mystic/modules/home_screen/home_screen_page.dart';
-import 'package:tien_giang_mystic/modules/login_screen/login_screen_binding.dart';
-import 'package:tien_giang_mystic/modules/login_screen/login_screen_page.dart';
-import 'package:tien_giang_mystic/modules/profile_screen/profile_screen_page.dart';
-import 'package:tien_giang_mystic/route/app_page.dart';
-import 'package:tien_giang_mystic/route/app_routes.dart';
-import 'package:tien_giang_mystic/themes/colors_theme.dart';
-import 'package:tien_giang_mystic/utils/responsive.dart';
+import 'package:tien_giang_mystic/utils/images.dart';
+
+import 'main_binding.dart';
+import 'main_controller.dart';
+import 'modules/chat_screen/chat_screen_page.dart';
+import 'modules/home_screen/home_screen_page.dart';
+import 'modules/profile_screen/profile_screen_page.dart';
+import 'route/app_page.dart';
+import 'utils/responsive.dart';
 
 Future<void> main() async {
   // await dotenv.load();
@@ -58,20 +57,23 @@ class MainScreen extends StatelessWidget {
   List<PersistentBottomNavBarItem> _navBarsItems() {
     return [
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.home),
-        title: ("Home"),
+        icon: ImageIcon(
+          AssetImage(Images.tgicon),
+          color: Color(0xFF3A5A98),
+        ),
         activeColorPrimary: Colors.blue,
         inactiveColorPrimary: Colors.grey,
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.chat),
-        title: ("Chat"),
+        icon: ImageIcon(
+          AssetImage(Images.tgicon),
+          color: Color(0xFF3A5A98),
+        ),
         activeColorPrimary: Colors.blue,
         inactiveColorPrimary: Colors.grey,
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.person),
-        title: ("Profile"),
         activeColorPrimary: Colors.blue,
         inactiveColorPrimary: Colors.grey,
       ),
