@@ -98,6 +98,7 @@ class HomeScreenPage extends GetView<HomeScreenController> {
                     title: "Điểm đến hàng đầu",
                     subTitle: "Xem tất cả",
                     listLocation: controller.topDestinations,
+                    onClickSubtitle: controller.onClickViewMore,
                   ),
                   BoxGap(
                     gapHeight: responsive.width * 0.1,

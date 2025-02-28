@@ -2,6 +2,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:tien_giang_mystic/modules/detail_location/detail_location_page.dart';
+import 'package:tien_giang_mystic/route/app_routes.dart';
 import 'package:tien_giang_mystic/themes/colors_theme.dart';
 import 'package:tien_giang_mystic/utils/images.dart';
 
@@ -50,7 +52,25 @@ class MainScreen extends StatelessWidget {
 
   List<Widget> _buildScreens() {
     return [
-      HomeScreenPage(),
+      Navigator(
+        key: Get.nestedKey(1),
+        initialRoute: '/home',
+        onGenerateRoute: (settings) {
+          if (settings.name == AppRoutes.home) {
+            return GetPageRoute(
+              settings: settings,
+              page: () => HomeScreenPage(),
+            );
+          }
+          if (settings.name == AppRoutes.detailLocation) {
+            return GetPageRoute(
+              settings: settings,
+              page: () => DetailLocationPage(),
+            );
+          }
+          return null;
+        },
+      ),
       ChatScreenPage(),
       ProfileScreenPage(),
     ];

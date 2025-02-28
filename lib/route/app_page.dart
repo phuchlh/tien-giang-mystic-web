@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:tien_giang_mystic/modules/chat_screen/chat_screen_binding.dart';
 import 'package:tien_giang_mystic/modules/chat_screen/chat_screen_page.dart';
+import 'package:tien_giang_mystic/modules/detail_location/detail_location_binding.dart';
+import 'package:tien_giang_mystic/modules/detail_location/detail_location_page.dart';
 import 'package:tien_giang_mystic/modules/home_screen/home_screen_binding.dart';
 import 'package:tien_giang_mystic/modules/home_screen/home_screen_page.dart';
 import 'package:tien_giang_mystic/modules/login_screen/login_screen_binding.dart';
@@ -26,5 +28,10 @@ class AppPages {
       page: () => ProfileScreenPage(),
       binding: ProfileScreenBinding(),
     ),
+    GetPage(
+      name: AppRoutes.detailLocation,
+      page: () => DetailLocationPage(),
+      binding: DetailLocationBinding(),
+    )
   ];
 }

@@ -82,6 +82,6 @@ class HomeScreenController extends GetxController {
   }
 
   void onClickViewMore() {
-    print("123123123");
+    Get.toNamed(AppRoutes.detailLocation, id: 1);
   }
 }
