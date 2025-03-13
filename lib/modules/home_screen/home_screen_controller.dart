@@ -1,12 +1,8 @@
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:tien_giang_mystic/models/place_model.dart';
-import 'package:tien_giang_mystic/modules/login_screen/login_screen_binding.dart';
-import 'package:tien_giang_mystic/modules/login_screen/login_screen_page.dart';
-import 'package:tien_giang_mystic/modules/profile_screen/profile_screen_binding.dart';
-import 'package:tien_giang_mystic/modules/profile_screen/profile_screen_page.dart';
-import 'package:tien_giang_mystic/route/app_routes.dart';
-import 'package:tien_giang_mystic/utils/images.dart';
+
+import '../../models/place_model.dart';
+import '../../route/app_routes.dart';
+import '../../utils/images.dart';
 
 class HomeScreenController extends GetxController {
   static HomeScreenController get to => Get.find();
@@ -15,6 +11,45 @@ class HomeScreenController extends GetxController {
   final title = 'Home Screen'.obs;
 
   final pages = <String>[AppRoutes.chat, AppRoutes.profile];
+
+  List<PlaceModel> listPlaces = [
+    PlaceModel(
+      id: 1,
+      image: Images.tgicon,
+      title: 'Cai Be Floating Market',
+      location: 'Cai Be, Tien Giang',
+    ),
+    PlaceModel(
+      id: 2,
+      image: Images.tgicon,
+      title: 'Cai Be Floating Market',
+      location: 'Cai Be, Tien Giang',
+    ),
+    PlaceModel(
+      id: 3,
+      image: Images.tgicon,
+      title: 'Cai Be Floating Market',
+      location: 'Cai Be, Tien Giang',
+    ),
+    PlaceModel(
+      id: 4,
+      image: Images.tgicon,
+      title: 'Cai Be Floating Market',
+      location: 'Cai Be, Tien Giang',
+    ),
+    PlaceModel(
+      id: 5,
+      image: Images.tgicon,
+      title: 'Cai Be Floating Market',
+      location: 'Cai Be, Tien Giang',
+    ),
+    PlaceModel(
+      id: 6,
+      image: Images.tgicon,
+      title: 'Cai Be Floating Market',
+      location: 'Cai Be, Tien Giang',
+    ),
+  ];
 
   void changePage(int index) {
     currentIndex.value = index;
@@ -31,44 +66,6 @@ class HomeScreenController extends GetxController {
     print('Starting up');
   }
 
-  final topDestinations = [
-    {
-      "image": Images.tgicon,
-      "title": "Venice",
-      "location": "Veneto Region, Italy"
-    },
-    {
-      "image": Images.tgicon,
-      "title": "Mount Fuji",
-      "location": "Central Honshu, Japan"
-    },
-  ];
-
-  final placesData = [
-    PlaceModel(
-        id: 1,
-        category: "Du lịch sinh thái",
-        icon: "assets/icons/ecotourism.svg"),
-    PlaceModel(
-        id: 2,
-        category: "Di tích lịch sử",
-        icon: "assets/icons/historical.svg"),
-    PlaceModel(id: 3, category: "Tôn giáo", icon: "assets/icons/religious.svg"),
-    PlaceModel(
-        id: 4, category: "Vườn trái cây", icon: "assets/icons/orchard.svg"),
-    PlaceModel(
-        id: 5,
-        category: "Làng nghề thủ công",
-        icon: "assets/icons/handicraft.svg"),
-    PlaceModel(id: 6, category: "lễ hội", icon: "assets/icons/festival.svg"),
-    PlaceModel(
-        id: 7,
-        category: "Địa điểm khảo cổ",
-        icon: "assets/icons/archaeology.svg"),
-    PlaceModel(
-        id: 8, category: "Khu tưởng niệm", icon: "assets/icons/memorial.svg"),
-  ];
-
   String getTimeNow() {
     final now = DateTime.now();
     final hour = now.hour;
@@ -82,6 +79,6 @@ class HomeScreenController extends GetxController {
   }
 
   void onClickViewMore() {
-    Get.toNamed(AppRoutes.detailLocation, id: 1);
+    Get.toNamed(AppRoutes.detailLocation);
   }
 }

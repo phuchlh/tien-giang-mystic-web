@@ -6,6 +6,7 @@ class Responsive {
   Responsive(this.context);
 
   double get width => MediaQuery.of(context).size.width;
+  double get height => MediaQuery.of(context).size.height;
 
   late final _FontSize fontSize = _FontSize(width);
 

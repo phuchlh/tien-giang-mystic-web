@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tien_giang_mystic/components/image_slider.dart';
 import 'package:tien_giang_mystic/modules/detail_location/detail_location_controller.dart';
-import 'package:tien_giang_mystic/themes/colors_theme.dart';
-import 'package:tien_giang_mystic/utils/images.dart';
+import 'package:tien_giang_mystic/utils/responsive.dart';
 
 class DetailLocationPage extends GetView<DetailLocationController> {
   const DetailLocationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<Responsive>();
     return Scaffold(
       body: CustomScrollView(
         controller: controller.scrollController,
         slivers: [
           // SliverAppBar với hình ảnh và chuyển đổi title động
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: responsive.width * 0.6,
             pinned: true,
             backgroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () {
-                Get.back(id: 1);
-              },
-            ),
+                icon: Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: Get.back),
             actions: [
               IconButton(
                 icon: Icon(Icons.more_vert, color: Colors.black),
@@ -32,10 +30,11 @@ class DetailLocationPage extends GetView<DetailLocationController> {
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: Image.asset(
-                Images.tgicon,
-                fit: BoxFit.cover,
-              ),
+              background: CustomImageSlider(),
+              // Image.asset(
+              //   Images.tgicon,
+              //   fit: BoxFit.cover,
+              // ),
             ),
             title: Obx(
               () => AnimatedSwitcher(

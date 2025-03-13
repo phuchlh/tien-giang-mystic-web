@@ -1,16 +1,15 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/instance_manager.dart';
-import 'package:tien_giang_mystic/route/app_routes.dart';
-import 'package:tien_giang_mystic/themes/colors_theme.dart';
-import 'package:tien_giang_mystic/utils/responsive.dart';
+import 'package:tien_giang_mystic/utils/images.dart';
+
+import '../../../models/place_model.dart';
+import '../../../route/app_routes.dart';
+import '../../../utils/responsive.dart';
 
 class ListLocationTitle extends StatelessWidget {
   final String title;
   final String? subTitle;
-  final List listLocation;
+  final List<PlaceModel> listLocation;
   final VoidCallback? onClickSubtitle;
   const ListLocationTitle({
     super.key,
@@ -23,84 +22,71 @@ class ListLocationTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Get.find<Responsive>();
-    return Column(children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: responsive.fontSize.large,
-                fontWeight: FontWeight.bold,
-                color: ThemeColor.grey1,
-              ),
-            ),
-            if (subTitle != null)
-              TextButton(
-                onPressed: onClickSubtitle,
-                child: Text(
-                  subTitle ?? "",
-                  style: TextStyle(
-                    fontSize: responsive.fontSize.small + 2,
-                    color: ThemeColor.blue1,
-                  ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: responsive.fontSize.large,
+                  fontWeight: FontWeight.bold,
+                  color: context.theme.colorScheme.secondary,
                 ),
-              )
-          ],
+              ),
+              if (subTitle != null)
+                TextButton(
+                  onPressed: onClickSubtitle,
+                  child: Text(
+                    subTitle ?? "",
+                    style: TextStyle(
+                      fontSize: responsive.fontSize.small + 2,
+                      color: context.theme.colorScheme.primary,
+                    ),
+                  ),
+                )
+            ],
+          ),
         ),
-      ),
-      const SizedBox(height: 15),
 
-      // Card List
-      SizedBox(
-        height: 250,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: listLocation.length,
-          itemBuilder: (context, index) {
-            final place = listLocation[index];
-            return _buildTopDestinationCard(
-              place['image'] ?? "",
-              place['title'] ?? "",
-              place['location'] ?? "",
-            );
-          },
+        // Card List
+        Container(
+          // color: Colors.redAccent,
+          padding: EdgeInsets.symmetric(vertical: responsive.spacing(0.01)),
+          child: SizedBox(
+            height: responsive.height * 0.3,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: listLocation.length,
+              itemBuilder: (context, index) {
+                final place = listLocation[index];
+                return _buildTopDestinationCard(place, context);
+              },
+            ),
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }
 
-Widget _buildTopDestinationCard(String image, String title, String location) {
+Widget _buildTopDestinationCard(PlaceModel place, BuildContext context) {
   final responsive = Get.find<Responsive>();
   return GestureDetector(
-    onTap: () => Get.toNamed(AppRoutes.detailLocation, id: 1),
-    child: Container(
-      width: responsive.width * 0.44,
-      margin: const EdgeInsets.only(left: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    onTap: () => Get.toNamed(AppRoutes.detailLocation),
+    child: Card(
+      color: context.theme.colorScheme.onPrimary,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             child: Image.asset(
-              image,
+              place.image,
               height: responsive.width * 0.43,
-              width: double.infinity,
-              fit: BoxFit.contain,
             ),
           ),
           Padding(
@@ -109,7 +95,7 @@ Widget _buildTopDestinationCard(String image, String title, String location) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  place.title,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -117,10 +103,10 @@ Widget _buildTopDestinationCard(String image, String title, String location) {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  location,
-                  style: const TextStyle(
+                  place.location,
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: context.theme.colorScheme.secondary,
                   ),
                 ),
               ],

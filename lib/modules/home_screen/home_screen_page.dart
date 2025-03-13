@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tien_giang_mystic/components/box_gap.dart';
-import 'package:tien_giang_mystic/modules/home_screen/components/list_title_location.dart';
-import 'home_screen_controller.dart';
+import 'package:keyboard_dismisser/keyboard_dismisser.dart';
+
+import '../../components/box_gap.dart';
 import '../../utils/images.dart';
 import '../../utils/responsive.dart';
-import 'package:keyboard_dismisser/keyboard_dismisser.dart';
+import 'components/list_title_location.dart';
+import 'home_screen_controller.dart';
 
 class HomeScreenPage extends GetView<HomeScreenController> {
   const HomeScreenPage({super.key});
@@ -97,19 +98,19 @@ class HomeScreenPage extends GetView<HomeScreenController> {
                   ListLocationTitle(
                     title: "Điểm đến hàng đầu",
                     subTitle: "Xem tất cả",
-                    listLocation: controller.topDestinations,
+                    listLocation: controller.listPlaces,
                     onClickSubtitle: controller.onClickViewMore,
                   ),
                   BoxGap(
-                    gapHeight: responsive.width * 0.1,
+                    gapHeight: responsive.width * 0.02,
                   ),
                   ListLocationTitle(
-                    title: "Điểm đến hàng đầu",
+                    title: "Điểm đến được yêu thích",
                     subTitle: "Xem tất cả",
-                    listLocation: controller.topDestinations,
+                    listLocation: controller.listPlaces,
                   ),
                   BoxGap(
-                    gapHeight: responsive.width * 0.1,
+                    gapHeight: responsive.width * 0.05,
                   ),
                 ],
               ),
