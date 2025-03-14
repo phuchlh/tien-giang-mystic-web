@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:tien_giang_mystic/modules/map_screen/map_screen_controller.dart';
 import 'package:tien_giang_mystic/utils/responsive.dart';
@@ -26,9 +27,7 @@ class PanelInformation extends GetView<MapScreenController> {
                     color: context.theme.colorScheme.scrim,
                   ),
                 ),
-                SizedBox(
-                  height: res.height * 0.01,
-                ),
+                Gap(10.0),
                 Text(
                   "Giá vé: ${controller.placeDetail.value.ticket ?? ''}",
                   style: context.textTheme.bodyLarge?.copyWith(
