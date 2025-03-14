@@ -95,23 +95,23 @@ class HomeScreenPage extends GetView<HomeScreenController> {
                   ),
 
                   // Top Destination
-                  ListLocationTitle(
-                    title: "Điểm đến hàng đầu",
-                    subTitle: "Xem tất cả",
-                    listLocation: controller.listPlaces,
-                    onClickSubtitle: controller.onClickViewMore,
-                  ),
-                  BoxGap(
-                    gapHeight: responsive.width * 0.02,
-                  ),
-                  ListLocationTitle(
-                    title: "Điểm đến được yêu thích",
-                    subTitle: "Xem tất cả",
-                    listLocation: controller.listPlaces,
-                  ),
-                  BoxGap(
-                    gapHeight: responsive.width * 0.05,
-                  ),
+                  // ListLocationTitle(
+                  //   title: "Điểm đến hàng đầu",
+                  //   subTitle: "Xem tất cả",
+                  //   listLocation: controller.listPlaces,
+                  //   onClickSubtitle: controller.onClickViewMore,
+                  // ),
+                  // BoxGap(
+                  //   gapHeight: responsive.width * 0.02,
+                  // ),
+                  // ListLocationTitle(
+                  //   title: "Điểm đến được yêu thích",
+                  //   subTitle: "Xem tất cả",
+                  //   listLocation: controller.listPlaces,
+                  // ),
+                  // BoxGap(
+                  //   gapHeight: responsive.width * 0.05,
+                  // ),
                 ],
               ),
             ),

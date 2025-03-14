@@ -2,6 +2,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'main_binding.dart';
 import 'main_controller.dart';
@@ -11,6 +12,14 @@ import 'utils/responsive.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
+
+  final String urlSupabase = dotenv.env['SUPABASE_URL_TIEN_GIANG_MYSTIC']!;
+  final String anonKey = dotenv.env['ANON_KEY_TIEN_GIANG_MYSTIC']!;
+
+  await Supabase.initialize(
+    url: urlSupabase,
+    anonKey: anonKey,
+  );
   runApp(const MyApp());
 }
 

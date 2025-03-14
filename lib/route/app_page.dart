@@ -2,8 +2,8 @@ import 'package:get/get.dart';
 
 import '../modules/detail_location/detail_location_binding.dart';
 import '../modules/detail_location/detail_location_page.dart';
-import '../modules/explore_screen/map_screen_binding.dart';
-import '../modules/explore_screen/map_screen_page.dart';
+import '../modules/map_screen/map_screen_binding.dart';
+import '../modules/map_screen/map_screen_page.dart';
 import '../modules/home_screen/home_screen_binding.dart';
 import '../modules/home_screen/home_screen_page.dart';
 import '../modules/profile_screen/profile_screen_binding.dart';

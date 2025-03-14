@@ -12,45 +12,6 @@ class HomeScreenController extends GetxController {
 
   final pages = <String>[AppRoutes.chat, AppRoutes.profile];
 
-  List<PlaceModel> listPlaces = [
-    PlaceModel(
-      id: 1,
-      image: Images.tgicon,
-      title: 'Cai Be Floating Market',
-      location: 'Cai Be, Tien Giang',
-    ),
-    PlaceModel(
-      id: 2,
-      image: Images.tgicon,
-      title: 'Cai Be Floating Market',
-      location: 'Cai Be, Tien Giang',
-    ),
-    PlaceModel(
-      id: 3,
-      image: Images.tgicon,
-      title: 'Cai Be Floating Market',
-      location: 'Cai Be, Tien Giang',
-    ),
-    PlaceModel(
-      id: 4,
-      image: Images.tgicon,
-      title: 'Cai Be Floating Market',
-      location: 'Cai Be, Tien Giang',
-    ),
-    PlaceModel(
-      id: 5,
-      image: Images.tgicon,
-      title: 'Cai Be Floating Market',
-      location: 'Cai Be, Tien Giang',
-    ),
-    PlaceModel(
-      id: 6,
-      image: Images.tgicon,
-      title: 'Cai Be Floating Market',
-      location: 'Cai Be, Tien Giang',
-    ),
-  ];
-
   void changePage(int index) {
     currentIndex.value = index;
     Get.toNamed(pages[index], id: 1);

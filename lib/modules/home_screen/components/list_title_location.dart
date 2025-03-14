@@ -85,7 +85,8 @@ Widget _buildTopDestinationCard(PlaceModel place, BuildContext context) {
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             child: Image.asset(
-              place.image,
+              // place.image,
+              Images.tgicon,
               height: responsive.width * 0.43,
             ),
           ),
@@ -95,7 +96,7 @@ Widget _buildTopDestinationCard(PlaceModel place, BuildContext context) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  place.title,
+                  "ABC",
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -103,7 +104,7 @@ Widget _buildTopDestinationCard(PlaceModel place, BuildContext context) {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  place.location,
+                  "ABC",
                   style: TextStyle(
                     fontSize: 12,
                     color: context.theme.colorScheme.secondary,
