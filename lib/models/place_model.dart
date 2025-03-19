@@ -15,6 +15,7 @@ class PlaceModel extends Equatable {
   String? viewNumber;
   String? phoneNumber;
   String? openCloseHour;
+  String? placeImageFolder;
 
   PlaceModel(
       {this.id,
@@ -30,7 +31,8 @@ class PlaceModel extends Equatable {
       this.placeLabel,
       this.viewNumber,
       this.phoneNumber,
-      this.openCloseHour});
+      this.openCloseHour,
+      this.placeImageFolder});
 
   PlaceModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -47,6 +49,7 @@ class PlaceModel extends Equatable {
     viewNumber = json['view_number'];
     phoneNumber = json['phone_number'];
     openCloseHour = json['open_close_hour'];
+    placeImageFolder = json['place_image_folder'];
   }
 
   Map<String, dynamic> toJson() {
@@ -65,6 +68,7 @@ class PlaceModel extends Equatable {
     data['view_number'] = viewNumber;
     data['phone_number'] = phoneNumber;
     data['open_close_hour'] = openCloseHour;
+    data['place_image_folder'] = placeImageFolder;
     return data;
   }
 
@@ -84,6 +88,7 @@ class PlaceModel extends Equatable {
         placeLabel,
         viewNumber,
         phoneNumber,
-        openCloseHour
+        openCloseHour,
+        placeImageFolder
       ];
 }

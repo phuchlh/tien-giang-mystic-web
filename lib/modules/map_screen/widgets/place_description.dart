@@ -1,35 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
 import 'package:readmore/readmore.dart';
-import 'package:tien_giang_mystic/modules/map_screen/map_screen_controller.dart';
-import 'package:tien_giang_mystic/utils/responsive.dart';
+
+import '../../../utils/gap.dart';
+import '../map_screen_controller.dart';
 
 class PlaceDescription extends GetView<MapScreenController> {
-  const PlaceDescription({super.key});
+  final ScrollController scrollController;
+  const PlaceDescription({super.key, required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
-    final res = Get.find<Responsive>();
     return GetBuilder<MapScreenController>(
       builder: (controller) => Obx(
         () {
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: res.spacing(0.03)),
+            padding: EdgeInsets.symmetric(horizontal: k14, vertical: k10),
             child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                  bottom: res.spacing(0.2), top: res.spacing(0.03)),
-              controller: controller.scrollController,
+              controller: scrollController,
               child: ReadMoreText(
                 controller.placeDetail.value.description ?? "",
-                trimLines: 3,
+                trimLines: 5,
                 colorClickableText: context.theme.primaryColor,
                 trimMode: TrimMode.Line,
                 trimCollapsedText: 'Xem thêm',
                 trimExpandedText: 'Thu gọn',
-                style: context.textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey.shade600,
-                  fontSize: 16.0,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black.withOpacity(0.8),
                 ),
               ),
             ),

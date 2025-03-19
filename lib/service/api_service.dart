@@ -1,50 +1,54 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+
+import '../utils/enum.dart';
 
 class ApiService {
-  late Dio _dio;
-  final String baseUrl = dotenv.env['N8N_WEBHOOK_BASE_URL']!;
-  final String webhookEndpoint = dotenv.env['N8N_WEBHOOK_PRODUCTION_ENPOINT']!;
+  final Dio _dio;
 
-  ApiService() {
-    _dio = Dio(BaseOptions(
-      baseUrl: baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    ));
+  final String n8nBase = dotenv.env['N8N_WEBHOOK_BASE_URL']!;
+  final String n8nTest = dotenv.env['N8N_WEBHOOK_TEST_ENPOINT']!;
+  final String n8nProd = dotenv.env['N8N_WEBHOOK_PRODUCTION_ENPOINT']!;
+  final String serper = dotenv.env['SERPER_BASE_URL']!;
+  final String apiKey = dotenv.env['API_KEY']!; // Lấy API Key nếu cần
 
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        print("[API Request] ${options.method} ${options.uri}");
-        return handler.next(options);
-      },
-      onResponse: (response, handler) {
-        print("[API Response] ${response.statusCode} ${response.data}");
-        return handler.next(response);
-      },
-      onError: (DioException e, handler) {
-        print("[API Error] ${e.response?.statusCode} - ${e.message}");
-        return handler.next(e);
-      },
-    ));
+  ApiService({String? baseUrl})
+      : _dio = Dio(BaseOptions(
+          baseUrl: baseUrl ?? '',
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        )) {
+    _dio.interceptors.add(
+      PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        responseHeader: false,
+        error: true,
+        compact: true,
+        maxWidth: 90,
+      ),
+    );
   }
 
-  // Gửi tin nhắn đến webhook N8N
-  Future<Response?> sendMessageToN8N(String message, String userId) async {
-    try {
-      final response = await _dio.post(
-        webhookEndpoint,
-        data: {
-          "chatInput": message,
-        },
-      );
-      return response;
-    } catch (e) {
-      print("Error sending message: $e");
-      return null;
+  void setHeaders(Map<String, String> headers) {
+    _dio.options.headers.addAll(headers);
+  }
+
+  /// Lấy Base URL tùy theo loại API
+  String _getBaseURL(EBaseURLType type) {
+    switch (type) {
+      case EBaseURLType.N8N_TEST:
+        return '$n8nBase$n8nTest';
+      case EBaseURLType.N8N_PROD:
+        return '$n8nBase$n8nProd';
+      case EBaseURLType.SUPABASE:
+        return ""; // Cập nhật nếu cần
+      case EBaseURLType.SERPER_NEWS:
+        return '$serper/news';
+      case EBaseURLType.SERPER_PLACES:
+        return '$serper/places';
     }
   }
 }

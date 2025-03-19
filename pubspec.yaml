@@ -54,6 +54,8 @@ dependencies:
     sliding_up_panel: ^2.0.0+1
     readmore: ^3.0.0
     gap: ^3.0.1
+    pretty_dio_logger: ^1.4.0
+    blur: ^4.0.0
 
 dev_dependencies:
     flutter_test:
