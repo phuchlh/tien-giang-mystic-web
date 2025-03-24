@@ -56,6 +56,11 @@ dependencies:
     gap: ^3.0.1
     pretty_dio_logger: ^1.4.0
     blur: ^4.0.0
+    extended_image: ^10.0.0
+    uuid: ^4.5.1
+    shared_preferences: ^2.5.2
+    logger: ^2.5.0
+    flutter_markdown: ^0.7.6+2
 
 dev_dependencies:
     flutter_test:

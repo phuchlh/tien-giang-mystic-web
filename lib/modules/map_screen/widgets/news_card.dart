@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -45,14 +46,25 @@ class NewsCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   child: Stack(
                     children: [
-                      Image.network(
+                      // Image.network(
+                      //   news.imageUrl ?? '',
+                      //   width: double.infinity,
+                      //   fit: BoxFit.cover,
+                      // ),
+
+                      ExtendedImage.network(
                         news.imageUrl ?? '',
                         width: double.infinity,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
+                        cache: true,
+                        border: Border.all(color: Colors.red, width: 1.0),
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                        //cancelToken: cancellationToken,
                       ),
                       Positioned.fill(
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
                           child: Container(
                             color: Colors.black.withOpacity(0.2), // Overlay nhẹ
                           ),

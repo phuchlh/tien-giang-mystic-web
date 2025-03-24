@@ -1,10 +1,20 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:logger/logger.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tien_giang_mystic/models/response_message_model.dart';
+import 'package:tien_giang_mystic/service/n8n_service.dart';
+import 'package:tien_giang_mystic/service/session_service.dart';
+import 'package:tien_giang_mystic/service/supabase_service.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../models/news_model.dart';
 import '../../models/place_model.dart';
@@ -15,10 +25,8 @@ import 'widgets/explore_widget.dart';
 
 class MapScreenController extends GetxController
     with GetSingleTickerProviderStateMixin, GetTickerProviderStateMixin {
-  // static final SupabaseController supabaseController =
-  //     Get.find<SupabaseController>();
-  // static final SupabaseClient supabaseAI = supabaseController.tgMysticAI;
-  final supabase = Supabase.instance.client;
+  final aiClient = SupabaseService().getAIClient();
+  final businessClient = SupabaseService().getBusinessClient();
 
   // controllers
   final MapController mapController = MapController();
@@ -35,6 +43,7 @@ class MapScreenController extends GetxController
   late Rx<GetImageStatus> getImageStatus;
   List<String> listImages = <String>[].obs;
   List<News> listSearch = <News>[].obs;
+  Rx<bool> isShowTextfield = true.obs;
 
   final TextEditingController promptController = TextEditingController();
   final RxList<String> suggestions = <String>[].obs;
@@ -60,6 +69,31 @@ class MapScreenController extends GetxController
 
   final _serperService = SerperService();
 
+  final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
+  final RxBool isWaiting = false.obs;
+  Rx<String> chatID = ''.obs;
+
+  RxList<Map<String, dynamic>> listMsgs = <Map<String, dynamic>>[].obs;
+  RxBool isLoading = true.obs;
+
+  StreamSubscription? _subscription;
+
+  final String sampleMarkdown = """
+  ## Emphasis
+
+**This is bold text**
+
+__This is bold text__
+
+*This is italic text*
+
+_This is italic text_
+
+~~Strikethrough~~
+""";
+
+  final RxBool isMinimized = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -68,13 +102,15 @@ class MapScreenController extends GetxController
     tabController = TabController(length: 3, vsync: this);
     dataLoadingStatus = DataLoadingStatus.pending.obs;
     getImageStatus = GetImageStatus.pending.obs;
-    // authController.signInAsGuest();
+    // _listenToMessages();
   }
 
   @override
   void onClose() {
     super.onClose();
     tabController.dispose();
+    _subscription?.cancel();
+    promptController.dispose();
   }
 
   void animatedMapMove(LatLng destLocation, double destZoom) {
@@ -114,7 +150,7 @@ class MapScreenController extends GetxController
       : panelController.open();
 
   Future<void> _loadLocationData() async {
-    final List locationData = await supabase
+    final List locationData = await aiClient
         .from('place_destination')
         .select('id, place_name, latitude, longitude, place_image_folder');
     if (locationData.isNotEmpty) {
@@ -128,7 +164,7 @@ class MapScreenController extends GetxController
     getImageStatus.value = GetImageStatus.loading;
 
     final List singleLocation =
-        await supabase.from('place_destination').select().eq('id', pm.id ?? 0);
+        await aiClient.from('place_destination').select().eq('id', pm.id ?? 0);
     if (singleLocation.isNotEmpty) {
       placeDetail.value = PlaceModel.fromJson(singleLocation.first);
       dataLoadingStatus.value = DataLoadingStatus.loaded;
@@ -156,7 +192,7 @@ class MapScreenController extends GetxController
       String bucketName, String folderPath) async {
     try {
       final response =
-          await supabase.storage.from(bucketName).list(path: folderPath);
+          await aiClient.storage.from(bucketName).list(path: folderPath);
 
       if (response.isEmpty) {
         getImageStatus.value = GetImageStatus.loaded;
@@ -196,23 +232,103 @@ class MapScreenController extends GetxController
     );
   }
 
-  void showExploreDialog() {
-    Get.dialog(
-      Dialog(
-        child: ExploreWidget(),
-      ),
+  void showExploreDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.transparent,
+      builder: (context) {
+        return Material(
+          type: MaterialType.transparency,
+          child: Stack(
+            children: [
+              Positioned(
+                right: 16,
+                bottom: 80,
+                child: SizedBox(
+                  width: 320, // Fixed width for chat window
+                  child: const ExploreWidget(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  void generateSuggestions() {
-    String prompt = promptController.text.trim();
-    if (prompt.isNotEmpty) {
-      suggestions.assignAll([
-        "$prompt - Đề xuất 1",
-        "$prompt - Đề xuất 2",
-        "$prompt - Đề xuất 3",
-        "$prompt - Đề xuất 4",
-      ]);
+  void addUserInput() async {
+    final userInput = promptController.text.trim();
+    if (userInput.isEmpty) {
+      isShowTextfield.value = true;
+      return;
     }
+
+    final ssID = await SessionService.getOrCreateSessionId();
+    final chatId = Uuid().v4();
+    isShowTextfield.value = false;
+
+    messages.add({
+      'text': userInput,
+      'isUser': true,
+    });
+    promptController.clear();
+    isWaiting.value = true;
+
+    var data = {
+      'chatInput': userInput,
+      'sessionID': ssID,
+      'chatID': chatId,
+    };
+
+    try {
+      final response =
+          await N8NService.postWithToken(EN8NWebhookType.PROD, data, "token");
+      Logger().i('Webhook response: ${response.data}');
+      if (response.statusCode == 200) {
+        final responseData = ResponseMessage.fromJson(response.data);
+        final chatResponse = responseData.data ?? "Không có dữ liệu trả về";
+
+        messages.add({
+          'text': chatResponse,
+          'isUser': false,
+        });
+        isWaiting.value = false;
+      } else {
+        _handleError('Webhook failed with status: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      // Xử lý lỗi mạng từ Dio
+      String errorMessage;
+      if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra internet.';
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = 'Hết thời gian kết nối. Vui lòng thử lại.';
+      } else {
+        errorMessage = 'Lỗi không xác định: ${e.message}';
+      }
+      _handleError(errorMessage);
+      print('DioException: $e'); // Debug chi tiết
+    } catch (e) {
+      _handleError('Lỗi không mong muốn: $e');
+      print('Unexpected error: $e');
+    }
+  }
+
+  void _handleError(String errorMessage) {
+    isWaiting.value = false;
+    messages.add({
+      'text': errorMessage,
+      'isUser': false,
+    });
+  }
+
+  void toggleMinimized() {
+    isMinimized.value = !isMinimized.value;
+  }
+
+  void closeChat() {
+    isShowTextfield.value = false;
+    // Add any additional cleanup needed
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tien_giang_mystic/service/session_service.dart';
+import 'package:tien_giang_mystic/service/supabase_service.dart';
 
 import 'main_binding.dart';
 import 'modules/map_screen/map_screen_page.dart';
@@ -12,13 +14,23 @@ import 'utils/responsive.dart';
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
 
-  final String urlSupabase = dotenv.env['SUPABASE_URL_TIEN_GIANG_MYSTIC']!;
-  final String anonKey = dotenv.env['ANON_KEY_TIEN_GIANG_MYSTIC']!;
+  // final supabaseService = SupabaseService();
+  // await supabaseService.init();
 
-  await Supabase.initialize(
-    url: urlSupabase,
-    anonKey: anonKey,
-  );
+  // Khởi tạo SupabaseService
+  // Khởi tạo SupabaseService
+  final supabaseService = SupabaseService();
+  try {
+    await supabaseService.init();
+    print('SupabaseService initialized successfully');
+  } catch (e) {
+    print('Error initializing SupabaseService: $e');
+    // Có thể hiển thị màn hình lỗi hoặc thoát ứng dụng nếu cần
+    return;
+  }
+  String sessionId = await SessionService.getOrCreateSessionId();
+  print("Session ID: $sessionId");
+
   runApp(const MyApp());
 }
 

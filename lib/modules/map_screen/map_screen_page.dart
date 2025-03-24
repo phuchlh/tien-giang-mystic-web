@@ -22,7 +22,7 @@ class MapScreenPage extends GetView<MapScreenController> {
           builder: (controller) => Scaffold(
             extendBody: true,
             floatingActionButton: FloatingActionButton(
-              onPressed: controller.showExploreDialog,
+              onPressed: () => controller.showExploreDialog(context),
               child: const Icon(Icons.chat_bubble_outline),
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

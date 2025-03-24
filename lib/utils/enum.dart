@@ -32,3 +32,8 @@ enum EBaseURLType {
   SERPER_NEWS,
   SERPER_PLACES,
 }
+
+enum EN8NWebhookType {
+  TEST,
+  PROD,
+}
