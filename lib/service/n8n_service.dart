@@ -13,8 +13,8 @@ class N8NService {
     BaseOptions(
       baseUrl: dotenv.env['N8N_WEBHOOK_BASE_URL'] ?? '',
       receiveDataWhenStatusError: false,
-      connectTimeout: const Duration(seconds: 60),
-      receiveTimeout: const Duration(seconds: 60),
+      connectTimeout: const Duration(seconds: 180),
+      receiveTimeout: const Duration(seconds: 180),
     ),
   )..interceptors.add(
       PrettyDioLogger(

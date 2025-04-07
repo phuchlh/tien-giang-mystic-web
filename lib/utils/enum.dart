@@ -37,3 +37,8 @@ enum EN8NWebhookType {
   TEST,
   PROD,
 }
+
+enum EPlaceGenerated {
+  HOLD,
+  GENERATED,
+}

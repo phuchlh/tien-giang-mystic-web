@@ -10,4 +10,5 @@ class Images {
   // animated
   static final String noData = 'assets/animated/no_data.json';
   static final String loading = 'assets/animated/loading.json';
+  static final String loading2 = 'assets/animated/loading2.json';
 }

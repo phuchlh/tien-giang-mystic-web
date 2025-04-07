@@ -1,5 +1,6 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -9,19 +10,17 @@ import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:logger/logger.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tien_giang_mystic/models/response_message_model.dart';
-import 'package:tien_giang_mystic/service/n8n_service.dart';
-import 'package:tien_giang_mystic/service/session_service.dart';
-import 'package:tien_giang_mystic/service/supabase_service.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/news_model.dart';
 import '../../models/place_model.dart';
+import '../../models/response_message_model.dart';
+import '../../service/n8n_service.dart';
 import '../../service/serper_service.dart';
+import '../../service/session_service.dart';
+import '../../service/supabase_service.dart';
 import '../../utils/constant.dart';
 import '../../utils/enum.dart';
-import 'widgets/explore_widget.dart';
 
 class MapScreenController extends GetxController
     with GetSingleTickerProviderStateMixin, GetTickerProviderStateMixin {
@@ -44,6 +43,9 @@ class MapScreenController extends GetxController
   List<String> listImages = <String>[].obs;
   List<News> listSearch = <News>[].obs;
   Rx<bool> isShowTextfield = true.obs;
+  List<PlaceModel> listPlaceGenerated = <PlaceModel>[].obs;
+  final Rx<EPlaceGenerated> placeGeneratedStatus = EPlaceGenerated.HOLD.obs;
+  final Rx<EPlaceGenerated> testStatus = EPlaceGenerated.GENERATED.obs;
 
   final TextEditingController promptController = TextEditingController();
   final RxList<String> suggestions = <String>[].obs;
@@ -70,7 +72,7 @@ class MapScreenController extends GetxController
   final _serperService = SerperService();
 
   final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
-  final RxBool isWaiting = false.obs;
+  final RxBool isProcessing = false.obs;
   Rx<String> chatID = ''.obs;
 
   RxList<Map<String, dynamic>> listMsgs = <Map<String, dynamic>>[].obs;
@@ -94,6 +96,8 @@ _This is italic text_
 
   final RxBool isMinimized = false.obs;
 
+  final TextEditingController searchController = TextEditingController();
+
   @override
   void onInit() {
     super.onInit();
@@ -111,6 +115,7 @@ _This is italic text_
     tabController.dispose();
     _subscription?.cancel();
     promptController.dispose();
+    searchController.dispose();
   }
 
   void animatedMapMove(LatLng destLocation, double destZoom) {
@@ -232,31 +237,6 @@ _This is italic text_
     );
   }
 
-  void showExploreDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierColor: Colors.transparent,
-      builder: (context) {
-        return Material(
-          type: MaterialType.transparency,
-          child: Stack(
-            children: [
-              Positioned(
-                right: 16,
-                bottom: 80,
-                child: SizedBox(
-                  width: 320, // Fixed width for chat window
-                  child: const ExploreWidget(),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   void addUserInput() async {
     final userInput = promptController.text.trim();
     if (userInput.isEmpty) {
@@ -267,13 +247,13 @@ _This is italic text_
     final ssID = await SessionService.getOrCreateSessionId();
     final chatId = Uuid().v4();
     isShowTextfield.value = false;
+    isProcessing.value = true;
 
     messages.add({
       'text': userInput,
       'isUser': true,
     });
     promptController.clear();
-    isWaiting.value = true;
 
     var data = {
       'chatInput': userInput,
@@ -286,14 +266,15 @@ _This is italic text_
           await N8NService.postWithToken(EN8NWebhookType.PROD, data, "token");
       Logger().i('Webhook response: ${response.data}');
       if (response.statusCode == 200) {
+        isProcessing.value = false;
         final responseData = ResponseMessage.fromJson(response.data);
+        listPlaceGenerated = await getDataGenerated(chatId);
         final chatResponse = responseData.data ?? "Không có dữ liệu trả về";
 
         messages.add({
           'text': chatResponse,
           'isUser': false,
         });
-        isWaiting.value = false;
       } else {
         _handleError('Webhook failed with status: ${response.statusCode}');
       }
@@ -315,8 +296,32 @@ _This is italic text_
     }
   }
 
+  Future<List<PlaceModel>> getDataGenerated(String chatID) async {
+    print('Chat ID: $chatID');
+    final response = await aiClient
+        .from('message_filter_place')
+        .select()
+        .eq('chat_id', chatID);
+
+    print('Response from getDataGenerated: ${response.map((e) => e).toList()}');
+
+    if (response.isNotEmpty) {
+      placeGeneratedStatus.value = EPlaceGenerated.GENERATED;
+      Logger().i('Webhook response: $response');
+      isLoading.value = false;
+      final _listDataGenerated = (response as List)
+          .expand((item) => item['list_data'] as List)
+          .map((e) => PlaceModel.fromJson(e))
+          .toList();
+      return _listDataGenerated;
+    } else {
+      return [];
+    }
+  }
+
   void _handleError(String errorMessage) {
-    isWaiting.value = false;
+    isShowTextfield.value = true;
+    isProcessing.value = false;
     messages.add({
       'text': errorMessage,
       'isUser': false,
@@ -330,5 +335,25 @@ _This is italic text_
   void closeChat() {
     isShowTextfield.value = false;
     // Add any additional cleanup needed
+  }
+
+  void handleSearch(String value) {
+    // Implement search logic here
+    // For example:
+    // searchLocations(value);
+  }
+
+  void clearSearch() {
+    // Clear search results
+    // Reset map or markers if needed
+  }
+
+  List<String> onSplitPlaceLabel(String placeLabel) {
+    final List<String> splitPlaceLabel = placeLabel.split(',');
+    if (splitPlaceLabel.length > 1) {
+      return splitPlaceLabel;
+    } else {
+      return [placeLabel];
+    }
   }
 }

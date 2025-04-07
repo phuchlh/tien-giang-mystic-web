@@ -15,7 +15,7 @@ class ExploreWidget extends GetView<MapScreenController> {
     return Material(
       color: Colors.transparent,
       child: Container(
-        width: 320,
+        width: 400,
         height: 500,
         decoration: BoxDecoration(
           color: Colors.white,
@@ -171,7 +171,7 @@ class ExploreWidget extends GetView<MapScreenController> {
       left: 0,
       right: 0,
       child: Obx(
-        () => controller.isWaiting.value
+        () => controller.isProcessing.value
             ? Container(
                 padding: const EdgeInsets.all(8),
                 color: Colors.grey[50],
@@ -211,7 +211,7 @@ class ExploreWidget extends GetView<MapScreenController> {
               controller: controller.promptController,
               style: const TextStyle(fontSize: 14),
               decoration: InputDecoration(
-                hintText: "Nhập tin nhắn...",
+                hintText: "Bạn muốn khám phá những đâu tại Tiền Giang...",
                 hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
