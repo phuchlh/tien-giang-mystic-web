@@ -1,7 +1,10 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
+import 'package:dart_openai/dart_openai.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -21,6 +24,9 @@ import '../../service/session_service.dart';
 import '../../service/supabase_service.dart';
 import '../../utils/constant.dart';
 import '../../utils/enum.dart';
+
+import 'dart:html' as html;
+import 'package:http/http.dart' as http;
 
 class MapScreenController extends GetxController
     with GetSingleTickerProviderStateMixin, GetTickerProviderStateMixin {
@@ -45,7 +51,6 @@ class MapScreenController extends GetxController
   Rx<bool> isShowTextfield = true.obs;
   List<PlaceModel> listPlaceGenerated = <PlaceModel>[].obs;
   final Rx<EPlaceGenerated> placeGeneratedStatus = EPlaceGenerated.HOLD.obs;
-  final Rx<EPlaceGenerated> testStatus = EPlaceGenerated.GENERATED.obs;
 
   final TextEditingController promptController = TextEditingController();
   final RxList<String> suggestions = <String>[].obs;
@@ -69,6 +74,8 @@ class MapScreenController extends GetxController
     Tab(text: "Tin tức"),
   ];
 
+  late Rx<String> OPEN_AI_API_KEY = "".obs;
+
   final _serperService = SerperService();
 
   final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
@@ -78,25 +85,10 @@ class MapScreenController extends GetxController
   RxList<Map<String, dynamic>> listMsgs = <Map<String, dynamic>>[].obs;
   RxBool isLoading = true.obs;
 
-  StreamSubscription? _subscription;
-
-  final String sampleMarkdown = """
-  ## Emphasis
-
-**This is bold text**
-
-__This is bold text__
-
-*This is italic text*
-
-_This is italic text_
-
-~~Strikethrough~~
-""";
-
   final RxBool isMinimized = false.obs;
 
   final TextEditingController searchController = TextEditingController();
+  Rx<String> messageGenerated = "".obs;
 
   @override
   void onInit() {
@@ -106,14 +98,13 @@ _This is italic text_
     tabController = TabController(length: 3, vsync: this);
     dataLoadingStatus = DataLoadingStatus.pending.obs;
     getImageStatus = GetImageStatus.pending.obs;
-    // _listenToMessages();
+    OPEN_AI_API_KEY.value = dotenv.env['OPEN_AI_API_KEY'] ?? "";
   }
 
   @override
   void onClose() {
     super.onClose();
     tabController.dispose();
-    _subscription?.cancel();
     promptController.dispose();
     searchController.dispose();
   }
@@ -270,6 +261,7 @@ _This is italic text_
         final responseData = ResponseMessage.fromJson(response.data);
         listPlaceGenerated = await getDataGenerated(chatId);
         final chatResponse = responseData.data ?? "Không có dữ liệu trả về";
+        messageGenerated.value = chatResponse;
 
         messages.add({
           'text': chatResponse,
@@ -354,6 +346,39 @@ _This is italic text_
       return splitPlaceLabel;
     } else {
       return [placeLabel];
+    }
+  }
+
+  Future<void> generateTextToSpeech(String text) async {
+    try {
+      final uri = Uri.parse("https://api.openai.com/v1/audio/speech");
+
+      final headers = {
+        "Authorization": "Bearer $OPEN_AI_API_KEY",
+        "Content-Type": "application/json"
+      };
+
+      final body = jsonEncode({
+        "model": "tts-1", // or "tts-1-hd" for higher quality
+        "input": "dùng để tạo giọng nói",
+        "voice": "sage" // coral
+      });
+
+      final response = await http.post(uri, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        // Create a Blob and download/play the audio
+        final blob = html.Blob([response.bodyBytes], 'audio/mpeg');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final audio = html.AudioElement()
+          ..src = url
+          ..autoplay = true;
+        audio.play();
+      } else {
+        print("Failed: ${response.statusCode} - ${response.body}");
+      }
+    } catch (e) {
+      print('TTS Error: $e');
     }
   }
 }

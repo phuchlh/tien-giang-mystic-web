@@ -2,6 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
@@ -14,6 +17,10 @@ import '../../utils/gap.dart';
 import '../../utils/images.dart';
 import 'map_screen_controller.dart';
 import 'widgets/panel_information.dart';
+
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ph.dart';
+import 'package:iconify_flutter/icons/ant_design.dart';
 
 class MapScreenPage extends GetView<MapScreenController> {
   const MapScreenPage({super.key});
@@ -46,59 +53,12 @@ class MapScreenPage extends GetView<MapScreenController> {
                             "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                         subdomains: ['a', 'b', 'c'],
                       ),
-                      MarkerLayer(
-                        markers: [
-                          Marker(
-                            width: 40,
-                            height: 40,
-                            point: controller.initialPosition,
-                            child: const Icon(Icons.location_pin,
-                                color: Colors.red),
-                          ),
-                        ],
-                      ),
                       Obx(() {
                         if (controller.listPlace.isEmpty) {
                           return const SizedBox.shrink();
                         }
 
-                        return MarkerLayer(
-                          markers: controller.listPlace
-                              .map(
-                                (e) => Marker(
-                                  width: k50,
-                                  height: k50,
-                                  point: LatLng(
-                                    e.latitude ?? Constant.TIEN_GIANG_LATITUDE,
-                                    e.longitude ??
-                                        Constant.TIEN_GIANG_LONGITUDE,
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      controller.animatedMapMove(
-                                        LatLng(
-                                          e.latitude ??
-                                              Constant.TIEN_GIANG_LATITUDE,
-                                          e.longitude ??
-                                              Constant.TIEN_GIANG_LONGITUDE,
-                                        ),
-                                        16.0,
-                                      );
-                                      controller.loadSpecificLocationData(e);
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => _DialogDetail(),
-                                      );
-                                    },
-                                    child: const Icon(
-                                      Icons.location_pin,
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        );
+                        return _MarkerPlace();
                       }),
                     ],
                   ),
@@ -106,132 +66,11 @@ class MapScreenPage extends GetView<MapScreenController> {
 
                 // check isShowTextfield to show or hide the textfield
 
-                Obx(() {
-                  if (controller.isShowTextfield.value) {
-                    return Positioned(
-                      bottom: 30,
-                      left: 300,
-                      right: 300,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: controller.promptController,
-                                style: const TextStyle(fontSize: 14),
-                                decoration: InputDecoration(
-                                  hintText:
-                                      "Bạn muốn khám phá những đâu tại Tiền Giang...",
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey[400],
-                                    fontSize: 14,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 10,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                ),
-                                onSubmitted: (value) {
-                                  controller.addUserInput();
-                                },
-                              ),
-                            ),
-                            Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                color: context.theme.primaryColor,
-                                shape: BoxShape.circle,
-                              ),
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.send,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                onPressed: () {
-                                  controller.addUserInput();
-                                },
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(
-                                  minWidth: 40,
-                                  minHeight: 40,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                }),
+                // Obx(() => _SearchTextField()),
+                _SearchTextField(),
 
-                Obx(() {
-                  switch (controller.placeGeneratedStatus.value) {
-                    case EPlaceGenerated.HOLD:
-                      return SizedBox.shrink();
-                    case EPlaceGenerated.GENERATED:
-                      return Positioned(
-                        bottom: 10,
-                        left: 10,
-                        right: 10,
-                        child: Container(
-                          height: Get.height * 0.5,
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ScrollConfiguration(
-                            behavior: ScrollConfiguration.of(context).copyWith(
-                              dragDevices: {
-                                PointerDeviceKind.touch,
-                                PointerDeviceKind.mouse, // Enable mouse drag
-                              },
-                              scrollbars: true, // Hiển thị thanh cuộn
-                            ),
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: controller.listPlaceGenerated.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  width: Get.width * 0.3,
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  child: _PlaceCard(
-                                      placeItem:
-                                          controller.listPlaceGenerated[index]),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      );
-                  }
-                }),
+                // Obx(() => _PlaceCardPanel()),
+                _PlaceCardPanel(),
 
                 Obx(() {
                   if (controller.isProcessing.value) {
@@ -256,6 +95,170 @@ class MapScreenPage extends GetView<MapScreenController> {
         );
       },
     );
+  }
+}
+
+class _SearchTextField extends GetView<MapScreenController> {
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (!controller.isShowTextfield.value) return const SizedBox.shrink();
+
+      return Positioned(
+        bottom: 30,
+        left: 300,
+        right: 300,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller.promptController,
+                  style: const TextStyle(fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: "Bạn muốn khám phá những đâu tại Tiền Giang...",
+                    hintStyle: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onSubmitted: (_) => controller.addUserInput(),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: context.theme.primaryColor,
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                  onPressed: controller.addUserInput,
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(minWidth: 40, minHeight: 40),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class _PlaceCardPanel extends GetView<MapScreenController> {
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.placeGeneratedStatus.value != EPlaceGenerated.GENERATED) {
+        return const SizedBox.shrink();
+      }
+
+      return Stack(
+        children: [
+          Positioned(
+            bottom: 10,
+            left: 10,
+            right: 10,
+            child: Container(
+              height: Get.height * 0.43,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(
+                  dragDevices: {
+                    PointerDeviceKind.touch,
+                    PointerDeviceKind.mouse,
+                  },
+                  scrollbars: true,
+                ),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: controller.listPlaceGenerated.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      width: Get.width * 0.3,
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: _PlaceCard(
+                        placeItem: controller.listPlaceGenerated[index],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+              top: 60,
+              right: 20,
+              child: SizedBox(
+                width: k50,
+                height: k50,
+                child: SpeedDial(
+                  direction: SpeedDialDirection.down,
+                  icon: Icons.settings,
+                  activeIcon: Icons.close,
+                  backgroundColor: context.theme.primaryColor,
+                  foregroundColor: context.theme.colorScheme.onPrimary,
+                  overlayColor: context.theme.colorScheme.onPrimary,
+                  overlayOpacity: 0.3,
+                  childrenButtonSize: const Size(50, 50),
+                  children: [
+                    SpeedDialChild(
+                      label: "Thuyết minh",
+                      child: Iconify(Ph.speaker_high_light),
+                      onTap: () {
+                        controller.generateTextToSpeech(
+                            controller.messageGenerated.value);
+                      },
+                    ),
+                    SpeedDialChild(
+                      label: "Đọc nội dung",
+                      child: Iconify(Ph.book_open_light),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => _MarkdownDialog(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      );
+    });
   }
 }
 
@@ -341,32 +344,120 @@ class _PlaceCard extends GetView<MapScreenController> {
             ),
             SizedBox(height: 8),
             Text("📍 ${placeItem.address}",
-                style: TextStyle(color: Colors.grey[700])),
-            Text("🕒 Open: ${placeItem.openCloseHour}",
-                style: TextStyle(color: Colors.grey[700])),
-            Text("⏱️ Visit Time: ${placeItem.visitTime}",
-                style: TextStyle(color: Colors.grey[700])),
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.theme.colorScheme.onSecondaryFixed,
+                )),
+
+            Text("🕒 ${placeItem.openCloseHour}",
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.theme.colorScheme.onSecondaryFixed,
+                )),
+            Text("⏱️ ${placeItem.visitTime}",
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.theme.colorScheme.onSecondaryFixed,
+                )),
             Text("📞 ${placeItem.phoneNumber}",
-                style: TextStyle(color: Colors.grey[700])),
-            SizedBox(height: 8),
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.theme.colorScheme.onSecondaryFixed,
+                )),
+            Gap(k8),
             Row(
               children: [
                 Icon(Icons.remove_red_eye, size: 16, color: Colors.grey),
-                SizedBox(width: 4),
+                Gap(k4),
                 Text('${placeItem.viewNumber}'),
-                SizedBox(width: 16),
+                Gap(k16),
                 Icon(Icons.favorite_border, size: 16, color: Colors.redAccent),
-                SizedBox(width: 4),
+                Gap(k4),
                 Text('${placeItem.likeNumber}'),
               ],
             ),
             Gap(k8),
             // display placeItem.description and make sure it is within the limits of the card
-            Text(
-              placeItem.description ?? "",
-              maxLines: 9,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.grey[700]),
+            Flexible(
+              child: Text(
+                placeItem.description ?? "",
+                // overflow: TextOverflow.ellipsis,
+                // maxLines: 6,
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MarkerPlace extends GetView<MapScreenController> {
+  const _MarkerPlace({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final places = controller.placeGeneratedStatus == EPlaceGenerated.HOLD
+        ? controller.listPlace
+        : controller.listPlaceGenerated;
+
+    final markers = places
+        .where((e) => e.latitude != null && e.longitude != null)
+        .map(
+          (e) => Marker(
+            width: k50,
+            height: k50,
+            point: LatLng(
+              e.latitude ?? Constant.TIEN_GIANG_LATITUDE,
+              e.longitude ?? Constant.TIEN_GIANG_LONGITUDE,
+            ),
+            child: GestureDetector(
+              onTap: () {
+                controller.animatedMapMove(
+                  LatLng(
+                    e.latitude ?? Constant.TIEN_GIANG_LATITUDE,
+                    e.longitude ?? Constant.TIEN_GIANG_LONGITUDE,
+                  ),
+                  16.0,
+                );
+                controller.loadSpecificLocationData(e);
+                showDialog(
+                  context: context,
+                  builder: (context) => _DialogDetail(),
+                );
+              },
+              child: const Icon(
+                Icons.location_pin,
+                color: Colors.blue,
+              ),
+            ),
+          ),
+        )
+        .toList();
+
+    return MarkerLayer(markers: markers);
+  }
+}
+
+class _MarkdownDialog extends GetView<MapScreenController> {
+  const _MarkdownDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: EdgeInsets.all(16),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 600, maxHeight: 600),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Obx(
+                  () => Markdown(
+                    // copyable
+                    selectable: true,
+                    data: controller.messageGenerated.value,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

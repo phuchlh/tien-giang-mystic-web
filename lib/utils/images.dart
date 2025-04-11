@@ -11,4 +11,8 @@ class Images {
   static final String noData = 'assets/animated/no_data.json';
   static final String loading = 'assets/animated/loading.json';
   static final String loading2 = 'assets/animated/loading2.json';
+
+  // icon
+  static final String speaker = 'assets/icon/speaker.svg';
+  static final String paragraph = 'assets/icon/paragraph.svg';
 }

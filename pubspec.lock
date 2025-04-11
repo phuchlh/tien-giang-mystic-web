@@ -113,6 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+  colorful_iconify_flutter:
+    dependency: transitive
+    description:
+      name: colorful_iconify_flutter
+      sha256: "3f9ee56343bfc7a48c41b4abb97b6fbb4e97ce017c6174a85898a3b709b881d7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.5"
   crypto:
     dependency: transitive
     description:
@@ -153,6 +161,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  dart_openai:
+    dependency: "direct main"
+    description:
+      name: dart_openai
+      sha256: "853bb57fed6a71c3ba0324af5cb40c16d196cf3aa55b91d244964ae4a241ccf1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.1.0"
   dio:
     dependency: "direct main"
     description:
@@ -201,6 +217,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.3"
+  fetch_api:
+    dependency: transitive
+    description:
+      name: fetch_api
+      sha256: "5198267e748828e3ac6199b7394dc60abba43ad8f6dd203e5351bd7bf3fd9efb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
+  fetch_client:
+    dependency: transitive
+    description:
+      name: fetch_client
+      sha256: ac87abcf7f71b509b1619b5cae7d23e4abd3912e2c17e542fdee9eac28e6829e
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.3"
   ffi:
     dependency: transitive
     description:
@@ -270,6 +302,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.5"
+  flutter_speed_dial:
+    dependency: "direct main"
+    description:
+      name: flutter_speed_dial
+      sha256: "698a037274a66dbae8697c265440e6acb6ab6cae9ac5f95c749e7944d8f28d41"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.0.0"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -368,6 +408,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  iconify_flutter:
+    dependency: "direct main"
+    description:
+      name: iconify_flutter
+      sha256: ad331a480c49284e3fb66a3896f04a9afa368147b0131897feff6aa0a8397ddb
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.7"
   image:
     dependency: transitive
     description:
