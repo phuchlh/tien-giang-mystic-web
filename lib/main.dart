@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tien_giang_mystic/service/session_service.dart';
-import 'package:tien_giang_mystic/service/supabase_service.dart';
+import 'service/session_service.dart';
+import 'service/supabase_service.dart';
 
 import 'main_binding.dart';
 import 'modules/map_screen/map_screen_page.dart';

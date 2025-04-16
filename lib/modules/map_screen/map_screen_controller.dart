@@ -2,14 +2,14 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:html' as html;
 
-import 'package:dart_openai/dart_openai.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:logger/logger.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -24,9 +24,6 @@ import '../../service/session_service.dart';
 import '../../service/supabase_service.dart';
 import '../../utils/constant.dart';
 import '../../utils/enum.dart';
-
-import 'dart:html' as html;
-import 'package:http/http.dart' as http;
 
 class MapScreenController extends GetxController
     with GetSingleTickerProviderStateMixin, GetTickerProviderStateMixin {
