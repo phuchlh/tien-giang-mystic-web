@@ -15,4 +15,8 @@ class Images {
   // icon
   static final String speaker = 'assets/icon/speaker.svg';
   static final String paragraph = 'assets/icon/paragraph.svg';
+
+  // images
+  static final String google = 'assets/image/google_logo.png';
+  
 }

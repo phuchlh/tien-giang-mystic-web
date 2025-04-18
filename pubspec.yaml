@@ -64,6 +64,7 @@ dependencies:
     flutter_speed_dial: ^7.0.0
     iconify_flutter: ^0.0.7
     dart_openai: ^5.1.0
+    google_sign_in: ^6.3.0
 
 dev_dependencies:
     flutter_test:
@@ -92,6 +93,7 @@ flutter:
         - assets/bottom/
         - assets/animated/
         - .env
+        - assets/images/
 
     # To add assets to your application, add an assets section, like this:
     # assets:

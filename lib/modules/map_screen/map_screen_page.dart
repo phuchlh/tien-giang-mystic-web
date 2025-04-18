@@ -4,23 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ph.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart' as lottie;
-import 'package:tien_giang_mystic/models/place_model.dart';
 
+import '../../models/place_model.dart';
 import '../../utils/constant.dart';
 import '../../utils/enum.dart';
 import '../../utils/gap.dart';
 import '../../utils/images.dart';
 import 'map_screen_controller.dart';
 import 'widgets/panel_information.dart';
-
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/ph.dart';
-import 'package:iconify_flutter/icons/ant_design.dart';
 
 class MapScreenPage extends GetView<MapScreenController> {
   const MapScreenPage({super.key});
@@ -43,14 +40,12 @@ class MapScreenPage extends GetView<MapScreenController> {
                       maxZoom: 100.0,
                       minZoom: 10.0,
                       cameraConstraint: CameraConstraint.containCenter(
-                        bounds: LatLngBounds.fromPoints(
-                            controller.tienGiangBoundary),
+                        bounds: LatLngBounds.fromPoints(controller.tienGiangBoundary),
                       ),
                     ),
                     children: [
                       TileLayer(
-                        urlTemplate:
-                            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                         subdomains: ['a', 'b', 'c'],
                       ),
                       Obx(() {
@@ -156,8 +151,7 @@ class _SearchTextField extends GetView<MapScreenController> {
                   icon: const Icon(Icons.send, color: Colors.white, size: 20),
                   onPressed: controller.addUserInput,
                   padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints(minWidth: 40, minHeight: 40),
+                  constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                 ),
               ),
             ],
@@ -239,8 +233,8 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
                       label: "Thuyết minh",
                       child: Iconify(Ph.speaker_high_light),
                       onTap: () {
-                        controller.generateTextToSpeech(
-                            controller.messageGenerated.value);
+                        controller
+                            .generateTextToSpeech(controller.messageGenerated.value);
                       },
                     ),
                     SpeedDialChild(
