@@ -10,6 +10,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/ph.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart' as lottie;
+import 'package:tien_giang_mystic/modules/auth/auth_widget.dart';
 
 import '../../models/place_model.dart';
 import '../../utils/constant.dart';
@@ -59,12 +60,13 @@ class MapScreenPage extends GetView<MapScreenController> {
                   ),
                 ),
 
+                // Profile Widget in top left corner
+                AuthWidget(),
+
                 // check isShowTextfield to show or hide the textfield
 
-                // Obx(() => _SearchTextField()),
                 _SearchTextField(),
 
-                // Obx(() => _PlaceCardPanel()),
                 _PlaceCardPanel(),
 
                 Obx(() {
