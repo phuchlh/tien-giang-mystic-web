@@ -1,105 +1,117 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'widget/button_widget.dart';
+import '../../models/user_metadata_model.dart';
+import '../../service/storage_service.dart';
+import '../../service/supabase_service.dart';
+import '../../utils/app_logger.dart';
 
 class AuthController extends GetxController {
-  final _googleSignIn = GoogleSignIn();
   final _isAuthenticated = false.obs;
   final _isLoading = false.obs;
   final RxBool isOpenMenu = false.obs;
-  final Rxn<GoogleSignInAccount> _user = Rxn<GoogleSignInAccount>();
+  final aiClient = SupabaseService().getAIClient();
+  final businessClient = SupabaseService().getBusinessClient();
+  final _storageService = StorageService();
 
   bool get isAuthenticated => _isAuthenticated.value;
   bool get isLoading => _isLoading.value;
-  GoogleSignInAccount? get user => _user.value;
+  final Rxn<UserMetaModel> user = Rxn<UserMetaModel>();
 
   @override
   void onInit() {
     super.onInit();
-    _checkCurrentUser();
-    _googleSignIn.onCurrentUserChanged.listen((account) {
-      _user.value = account;
-      _isAuthenticated.value = account != null;
+    onCheckSession();
+    businessClient.auth.onAuthStateChange.listen((data) {
+      _isAuthenticated.value = data.session != null;
     });
+  }
+
+  void onCheckSession() {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) {
+      print('Session found: $session');
+      user.value = UserMetaModel.fromMap(session.user.userMetadata ?? {});
+      print('User metadata: ${user.value}');
+
+      _isAuthenticated.value = true;
+
+      _storageService.saveTokens(
+        accessToken: session.accessToken,
+        refreshToken: session.refreshToken,
+      );
+    } else {
+      print('No session found');
+    }
+  }
+
+  Future<void> _handleTokenRefresh(Session? session) async {
+    if (session != null) {
+      await _storageService.saveTokens(
+        accessToken: session.accessToken,
+        refreshToken: session.refreshToken,
+      );
+      AppLogger.debug('Tokens refreshed and saved');
+    }
   }
 
   void toggle() {
     if (_isAuthenticated.value) {
       isOpenMenu.value = !isOpenMenu.value;
     } else {
-      // do signin with google
+      signInWithGoogle();
     }
   }
 
   void close() => isOpenMenu.value = false;
 
-  final List<ButtonWidget> buttonWithoutLogin = [
-    ButtonWidget(
-      text: 'Đăng nhập',
-      icon: Icons.login,
-      onPressed: () {},
-    ),
-  ];
-
-  final List<ButtonWidget> buttonWithLogin = [
-    ButtonWidget(
-      text: 'Đăng xuất',
-      icon: Icons.logout,
-      onPressed: () {},
-    ),
-  ];
-
-  Future<void> _checkCurrentUser() async {
+  Future<void> signInWithGoogle() async {
     _isLoading.value = true;
     try {
-      _user.value = await _googleSignIn.signInSilently();
-      _isAuthenticated.value = _user.value != null;
+      AppLogger.debug('Starting Google sign-in...');
+      final response = await businessClient.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: kIsWeb ? null : 'http://localhost:3000',
+        authScreenLaunchMode: kIsWeb
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication,
+      );
+
+      if (!response) {
+        AppLogger.error('Failed to start Google sign-in flow');
+        _isLoading.value = false;
+        Get.snackbar(
+          'Error',
+          'Failed to start Google sign-in',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
     } catch (error) {
-      print('Check current user error: $error');
-    } finally {
+      AppLogger.error('Google sign-in error: $error');
       _isLoading.value = false;
-    }
-  }
-
-  Future<void> signIn() async {
-    if (_isLoading.value) return;
-
-    _isLoading.value = true;
-    try {
-      final account = await _googleSignIn.signIn();
-      _user.value = account;
-      _isAuthenticated.value = account != null;
-    } catch (error) {
-      print('Sign in error: $error');
       Get.snackbar(
         'Error',
-        'Failed to sign in with Google',
+        'Failed to sign in with Google. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
       );
-    } finally {
-      _isLoading.value = false;
     }
   }
 
   Future<void> signOut() async {
-    if (_isLoading.value) return;
-
-    _isLoading.value = true;
     try {
-      await _googleSignIn.signOut();
-      _user.value = null;
+      user.value = null;
       _isAuthenticated.value = false;
+      _isLoading.value = false;
+      await _storageService.deleteTokens();
+      await businessClient.auth.signOut();
     } catch (error) {
-      print('Sign out error: $error');
+      AppLogger.error('Sign out error: $error');
       Get.snackbar(
         'Error',
-        'Failed to sign out',
+        'Failed to sign out. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
       );
-    } finally {
-      _isLoading.value = false;
     }
   }
 }

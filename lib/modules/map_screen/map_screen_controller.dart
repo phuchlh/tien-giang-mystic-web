@@ -33,7 +33,7 @@ class MapScreenController extends GetxController
   // controllers
   final MapController mapController = MapController();
   final PanelController panelController = PanelController();
-  ScrollController? scrollController;
+  final ScrollController scrollController = ScrollController();
   late TabController tabController;
   // final AuthController authController = Get.find<AuthController>();
 
@@ -104,6 +104,38 @@ class MapScreenController extends GetxController
     tabController.dispose();
     promptController.dispose();
     searchController.dispose();
+  }
+
+  void onClickButton(EButtonClickType type) {
+    if (type == EButtonClickType.NEXT) {
+      scrollController.animateTo(
+        scrollController.offset + Get.width * 0.3,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    } else if (type == EButtonClickType.BACK) {
+      scrollController.animateTo(
+        scrollController.offset - Get.width * 0.3,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+    // const duration = Duration(milliseconds: 2000);
+    // Timer.periodic(duration, (timer) {
+    //   final maxScroll = scrollController.position.maxScrollExtent;
+    //   final current = scrollController.offset;
+
+    //   // If at the end, go back to start
+    //   if (current >= maxScroll) {
+    //     scrollController.jumpTo(0); // or use animateTo with a quick duration
+    //   } else {
+    //     scrollController.animateTo(
+    //       current + Get.width * 0.3, // scroll one item forward
+    //       duration: const Duration(milliseconds: 500),
+    //       curve: Curves.easeInOut,
+    //     );
+    //   }
+    // });
   }
 
   void animatedMapMove(LatLng destLocation, double destZoom) {
@@ -286,13 +318,10 @@ class MapScreenController extends GetxController
   }
 
   Future<List<PlaceModel>> getDataGenerated(String chatID) async {
-    print('Chat ID: $chatID');
     final response = await aiClient
         .from('message_filter_place')
         .select()
         .eq('chat_id', chatID);
-
-    print('Response from getDataGenerated: ${response.map((e) => e).toList()}');
 
     if (response.isNotEmpty) {
       placeGeneratedStatus.value = EPlaceGenerated.GENERATED;

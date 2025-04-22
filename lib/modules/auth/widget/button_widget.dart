@@ -17,23 +17,27 @@ class ButtonWidget extends GetView<AuthController> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: k4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: Colors.white, size: k24),
-            Gap(k8),
-            Text(
-              text,
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
-                fontSize: k16,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: k4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: k24),
+              Gap(k8),
+              Text(
+                text,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                  fontSize: k16,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

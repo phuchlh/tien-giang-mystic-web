@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../utils/gap.dart';
+import '../../utils/images.dart';
 import 'auth_controller.dart';
 
 class AuthWidget extends GetView<AuthController> {
@@ -13,123 +15,136 @@ class AuthWidget extends GetView<AuthController> {
     return Positioned(
       top: 16,
       left: 16,
-      child: Material(
-        elevation: 4,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Obx(() {
-            if (controller.isLoading) {
-              return const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Obx(() {
+              if (controller.isLoading) {
+                return const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                );
+              }
+              return Row(
+                children: [
+                  GreetingWidget(isLogin: controller.isAuthenticated),
+                ],
               );
-            }
-            return AuthButton(isLogin: false);
-          }),
-        ),
+            }),
+          ),
+          Gap(k8),
+          AuthButton(),
+        ],
       ),
     );
   }
 }
 
 class AuthButton extends GetView<AuthController> {
-  final bool isLogin;
-  const AuthButton({super.key, required this.isLogin});
+  const AuthButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.topLeft,
-      clipBehavior: Clip.none,
-      children: [
-        // Nút chính (auth button)
-        MouseRegion(
-          cursor: SystemMouseCursors.click,
+    return Obx(() {
+      final isLoggedIn = controller.isAuthenticated;
+
+      return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: GestureDetector(
-            onTap: controller.toggle,
+            onTap:
+                isLoggedIn ? controller.signOut : controller.signInWithGoogle,
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                isLogin
-                    ? Lottie.asset(
-                        'assets/lottie/login.json',
-                        height: 32,
-                        width: 32,
-                      )
-                    : Icon(
-                        Icons.person,
-                        color: context.theme.dividerColor,
-                        size: 32,
-                      ),
-                const SizedBox(width: 8),
+                Icon(isLoggedIn ? Icons.logout : Icons.login),
+                Gap(k8),
                 Text(
-                  isLogin ? "Xin chào Phúc" : 'Đăng nhập ngay',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                  isLoggedIn ? "Đăng xuất" : "Đăng nhập ngay",
+                )
               ],
             ),
           ),
         ),
+      );
+    });
+  }
+}
 
-        // Dropdown menu
-        Positioned(
-          top: 48,
-          left: 0,
-          child: Obx(() {
-            return AnimatedOpacity(
-              opacity: controller.isOpenMenu.value ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 250),
-              child: AnimatedScale(
-                scale: controller.isOpenMenu.value ? 1.0 : 0.9,
-                duration: const Duration(milliseconds: 250),
-                child: Visibility(
-                  visible: controller.isOpenMenu.value,
-                  child: Column(
-                    children: [
-                      CustomPaint(
-                        size: const Size(20, 10),
-                        painter: _TrianglePainter(color: Colors.teal[400]!),
-                      ),
-                      Material(
-                        color: context.theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(12),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: k4, horizontal: k6),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: controller.isAuthenticated
-                                ? controller.buttonWithLogin
-                                : controller.buttonWithoutLogin,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+class GreetingWidget extends GetView<AuthController> {
+  final bool isLogin;
+  const GreetingWidget({super.key, required this.isLogin});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        isLogin
+            ? ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: controller.user.value?.picture ?? "",
+                  width: k32,
+                  height: k32,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => FirstNameAvatar(
+                      firstName: controller.user.value?.fullName ?? ""),
                 ),
+              )
+            : Image.asset(
+                Images.tgicon,
+                width: k32,
+                height: k32,
               ),
-            );
-          }),
+        Gap(k8),
+        Text(
+          isLogin
+              ? "Xin chào ${controller.user.value?.fullName ?? ""} "
+              : 'Chào mừng đến với Tiền Giang Mystic',
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildMenuItem(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Icon(icon, color: Colors.white, size: 24),
+class FirstNameAvatar extends StatelessWidget {
+  final String firstName;
+  const FirstNameAvatar({super.key, required this.firstName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: k32,
+      height: k32,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: context.theme.primaryColor,
+      ),
+      child: Center(
+        child: Text(
+          firstName.substring(0, 1).toUpperCase(),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

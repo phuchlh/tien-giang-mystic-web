@@ -10,13 +10,13 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/ph.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart' as lottie;
-import 'package:tien_giang_mystic/modules/auth/auth_widget.dart';
 
 import '../../models/place_model.dart';
 import '../../utils/constant.dart';
 import '../../utils/enum.dart';
 import '../../utils/gap.dart';
 import '../../utils/images.dart';
+import '../auth/auth_widget.dart';
 import 'map_screen_controller.dart';
 import 'widgets/panel_information.dart';
 
@@ -41,12 +41,14 @@ class MapScreenPage extends GetView<MapScreenController> {
                       maxZoom: 100.0,
                       minZoom: 10.0,
                       cameraConstraint: CameraConstraint.containCenter(
-                        bounds: LatLngBounds.fromPoints(controller.tienGiangBoundary),
+                        bounds: LatLngBounds.fromPoints(
+                            controller.tienGiangBoundary),
                       ),
                     ),
                     children: [
                       TileLayer(
-                        urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        urlTemplate:
+                            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                         subdomains: ['a', 'b', 'c'],
                       ),
                       Obx(() {
@@ -153,7 +155,8 @@ class _SearchTextField extends GetView<MapScreenController> {
                   icon: const Icon(Icons.send, color: Colors.white, size: 20),
                   onPressed: controller.addUserInput,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                  constraints:
+                      const BoxConstraints(minWidth: 40, minHeight: 40),
                 ),
               ),
             ],
@@ -175,46 +178,56 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
       return Stack(
         children: [
           Positioned(
-            bottom: 10,
-            left: 10,
-            right: 10,
-            child: Container(
-              height: Get.height * 0.43,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ScrollConfiguration(
-                behavior: ScrollConfiguration.of(context).copyWith(
-                  dragDevices: {
-                    PointerDeviceKind.touch,
-                    PointerDeviceKind.mouse,
-                  },
-                  scrollbars: true,
-                ),
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: controller.listPlaceGenerated.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      width: Get.width * 0.3,
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: _PlaceCard(
-                        placeItem: controller.listPlaceGenerated[index],
+              bottom: 10,
+              left: 0,
+              right: 0,
+              child: Row(
+                children: [
+                  _ButtonSlide(type: EButtonClickType.BACK),
+
+                  // 🧾 Scrollable Container
+                  Expanded(
+                    child: Container(
+                      height: Get.height * 0.43,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context).copyWith(
+                          dragDevices: {
+                            PointerDeviceKind.touch,
+                            PointerDeviceKind.mouse,
+                          },
+                          scrollbars: true,
+                        ),
+                        child: ListView.builder(
+                          controller: controller.scrollController,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: controller.listPlaceGenerated.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              width: Get.width * 0.3,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: _PlaceCard(
+                                placeItem: controller.listPlaceGenerated[index],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  _ButtonSlide(type: EButtonClickType.NEXT),
+                ],
+              )),
           Positioned(
               top: 60,
               right: 20,
@@ -235,8 +248,8 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
                       label: "Thuyết minh",
                       child: Iconify(Ph.speaker_high_light),
                       onTap: () {
-                        controller
-                            .generateTextToSpeech(controller.messageGenerated.value);
+                        controller.generateTextToSpeech(
+                            controller.messageGenerated.value);
                       },
                     ),
                     SpeedDialChild(
@@ -255,6 +268,31 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
         ],
       );
     });
+  }
+}
+
+class _ButtonSlide extends GetView<MapScreenController> {
+  final EButtonClickType type;
+  const _ButtonSlide({super.key, required this.type});
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = type == EButtonClickType.NEXT
+        ? Icons.arrow_forward_ios
+        : Icons.arrow_back_ios_new;
+    return Container(
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: context.theme.cardColor,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: context.iconColor),
+        onPressed: () => {
+          controller.onClickButton(type),
+        },
+      ),
+    );
   }
 }
 
@@ -389,9 +427,19 @@ class _MarkerPlace extends GetView<MapScreenController> {
   const _MarkerPlace({super.key});
   @override
   Widget build(BuildContext context) {
-    final places = controller.placeGeneratedStatus == EPlaceGenerated.HOLD
-        ? controller.listPlace
-        : controller.listPlaceGenerated;
+    late final List<PlaceModel> places;
+
+    switch (controller.placeGeneratedStatus) {
+      case EPlaceGenerated.HOLD:
+        places = controller.listPlace;
+        break;
+      case EPlaceGenerated.GENERATED:
+        places = controller.listPlaceGenerated;
+        break;
+      default:
+        places = controller.listPlaceGenerated;
+        break;
+    }
 
     final markers = places
         .where((e) => e.latitude != null && e.longitude != null)

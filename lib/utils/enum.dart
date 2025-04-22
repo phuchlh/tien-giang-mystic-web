@@ -42,3 +42,8 @@ enum EPlaceGenerated {
   HOLD,
   GENERATED,
 }
+
+enum EButtonClickType {
+  NEXT,
+  BACK,
+}

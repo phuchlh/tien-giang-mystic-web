@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'main_binding.dart';
 import 'modules/map_screen/map_screen_page.dart';
@@ -10,40 +11,43 @@ import 'service/supabase_service.dart';
 import 'themes/theme.dart';
 import 'utils/app_logger.dart';
 import 'utils/responsive.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 Future<void> main() async {
+  // Ensure proper initialization of Flutter bindings
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
-  final supabaseService = SupabaseService();
-  try {
-    await supabaseService.init();
-    // check if dotenv is loaded
-    if (dotenv.env['FIREBASE_API_KEY'] != null) {
-      await Firebase.initializeApp(
-        options: FirebaseOptions(
-          apiKey: dotenv.env['FIREBASE_API_KEY']!,
-          authDomain: "${dotenv.env['FIREBASE_PROJECT_ID']!}.firebaseapp.com",
-          projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
-          storageBucket:
-              "${dotenv.env['FIREBASE_PROJECT_ID']!}.firebasestorage.app",
-          messagingSenderId: dotenv.env['FIREBASE_SENDER_ID']!,
-          appId: dotenv.env['FIREBASE_APP_ID']!,
-          measurementId: dotenv.env['FIREBASE_MEASUREMENT_ID']!,
-        ),
-      );
-    }
-    AppLogger.debug("Initialize Successfully");
-  } catch (e) {
-    AppLogger.error(e);
-    // Có thể hiển thị màn hình lỗi hoặc thoát ứng dụng nếu cần
-    return;
-  }
-  String sessionId = await SessionService.getOrCreateSessionId();
-  AppLogger.info("Your sessionID is $sessionId");
+  // Add error handling for Flutter errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    AppLogger.error('Flutter error: ${details.exception}');
+  };
 
-  runApp(const MyApp());
+  try {
+    // Load environment variables
+    await dotenv.load(fileName: ".env");
+
+    // Initialize Supabase
+    final supabaseService = SupabaseService();
+    await supabaseService.init();
+    AppLogger.debug("Supabase initialized successfully");
+
+    // Initialize session
+    String sessionId = await SessionService.getOrCreateSessionId();
+    AppLogger.info("Session initialized with ID: $sessionId");
+
+    // Run the app inside a try-catch to catch any initialization errors
+    runApp(const MyApp());
+  } catch (e, stackTrace) {
+    AppLogger.error('Initialization error: $e\n$stackTrace');
+    // Show error screen instead of crashing
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('Error initializing app: $e'),
+        ),
+      ),
+    ));
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -58,6 +62,7 @@ class MyApp extends StatelessWidget {
       getPages: AppPages.pages,
       theme: MaterialTheme(TextTheme()).light(),
       initialBinding: MainBinding(),
+      navigatorKey: Get.key,
       home: Builder(
         builder: (context) {
           Get.put(Responsive(context), permanent: true);
