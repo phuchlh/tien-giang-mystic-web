@@ -48,6 +48,7 @@ class MapScreenController extends GetxController
   Rx<bool> isShowTextfield = true.obs;
   List<PlaceModel> listPlaceGenerated = <PlaceModel>[].obs;
   final Rx<EPlaceGenerated> placeGeneratedStatus = EPlaceGenerated.HOLD.obs;
+  final RxBool isShowPlaceCard = true.obs;
 
   final TextEditingController promptController = TextEditingController();
   final RxList<String> suggestions = <String>[].obs;
@@ -106,6 +107,8 @@ class MapScreenController extends GetxController
     searchController.dispose();
   }
 
+  void togglePlaceCard() => isShowPlaceCard.value = !isShowPlaceCard.value;
+
   void onClickButton(EButtonClickType type) {
     if (type == EButtonClickType.NEXT) {
       scrollController.animateTo(
@@ -120,22 +123,6 @@ class MapScreenController extends GetxController
         curve: Curves.easeInOut,
       );
     }
-    // const duration = Duration(milliseconds: 2000);
-    // Timer.periodic(duration, (timer) {
-    //   final maxScroll = scrollController.position.maxScrollExtent;
-    //   final current = scrollController.offset;
-
-    //   // If at the end, go back to start
-    //   if (current >= maxScroll) {
-    //     scrollController.jumpTo(0); // or use animateTo with a quick duration
-    //   } else {
-    //     scrollController.animateTo(
-    //       current + Get.width * 0.3, // scroll one item forward
-    //       duration: const Duration(milliseconds: 500),
-    //       curve: Curves.easeInOut,
-    //     );
-    //   }
-    // });
   }
 
   void animatedMapMove(LatLng destLocation, double destZoom) {

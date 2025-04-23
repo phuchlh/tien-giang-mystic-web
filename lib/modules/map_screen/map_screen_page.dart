@@ -54,23 +54,16 @@ class MapScreenPage extends GetView<MapScreenController> {
                       Obx(() {
                         if (controller.listPlace.isEmpty) {
                           return const SizedBox.shrink();
+                        } else {
+                          return _MarkerPlace();
                         }
-
-                        return _MarkerPlace();
                       }),
                     ],
                   ),
                 ),
-
-                // Profile Widget in top left corner
                 AuthWidget(),
-
-                // check isShowTextfield to show or hide the textfield
-
                 _SearchTextField(),
-
                 _PlaceCardPanel(),
-
                 Obx(() {
                   if (controller.isProcessing.value) {
                     // show loading with lottie and black background
@@ -179,54 +172,87 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
         children: [
           Positioned(
               bottom: 10,
-              left: 0,
-              right: 0,
-              child: Row(
-                children: [
-                  _ButtonSlide(type: EButtonClickType.BACK),
-
-                  // 🧾 Scrollable Container
-                  Expanded(
-                    child: Container(
-                      height: Get.height * 0.43,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+              left: -10,
+              right: -10,
+              child: Obx(
+                () {
+                  return AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.bottomCenter,
+                    child: Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: context.theme.cardColor,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        ],
-                      ),
-                      child: ScrollConfiguration(
-                        behavior: ScrollConfiguration.of(context).copyWith(
-                          dragDevices: {
-                            PointerDeviceKind.touch,
-                            PointerDeviceKind.mouse,
-                          },
-                          scrollbars: true,
+                          child: IconButton(
+                            onPressed: () {
+                              controller.togglePlaceCard();
+                            },
+                            icon: Icon(controller.isShowPlaceCard.value
+                                ? Icons.keyboard_arrow_down
+                                : Icons.keyboard_arrow_up),
+                            color: context.iconColor,
+                          ),
                         ),
-                        child: ListView.builder(
-                          controller: controller.scrollController,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: controller.listPlaceGenerated.length,
-                          itemBuilder: (context, index) {
-                            return Container(
-                              width: Get.width * 0.3,
-                              margin: const EdgeInsets.only(bottom: 8),
-                              child: _PlaceCard(
-                                placeItem: controller.listPlaceGenerated[index],
+                        SizedBox(
+                          height: controller.isShowPlaceCard.value
+                              ? Get.height * 0.43
+                              : 0,
+                          child: Row(
+                            children: [
+                              // 🧾 Scrollable Container
+                              Expanded(
+                                child: Container(
+                                  height: Get.height * 0.43,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ScrollConfiguration(
+                                    behavior: ScrollConfiguration.of(context)
+                                        .copyWith(
+                                      dragDevices: {
+                                        PointerDeviceKind.touch,
+                                        PointerDeviceKind.mouse,
+                                      },
+                                      scrollbars: true,
+                                    ),
+                                    child: ListView.builder(
+                                      controller: controller.scrollController,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount:
+                                          controller.listPlaceGenerated.length,
+                                      itemBuilder: (context, index) {
+                                        return Container(
+                                          width: Get.width * 0.3,
+                                          margin:
+                                              const EdgeInsets.only(bottom: 8),
+                                          child: _PlaceCard(
+                                            placeItem: controller
+                                                .listPlaceGenerated[index],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
                               ),
-                            );
-                          },
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-
-                  _ButtonSlide(type: EButtonClickType.NEXT),
-                ],
+                  );
+                },
               )),
           Positioned(
               top: 60,
@@ -437,7 +463,7 @@ class _MarkerPlace extends GetView<MapScreenController> {
         places = controller.listPlaceGenerated;
         break;
       default:
-        places = controller.listPlaceGenerated;
+        places = controller.listPlace;
         break;
     }
 

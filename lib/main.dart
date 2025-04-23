@@ -10,7 +10,6 @@ import 'service/session_service.dart';
 import 'service/supabase_service.dart';
 import 'themes/theme.dart';
 import 'utils/app_logger.dart';
-import 'utils/responsive.dart';
 
 Future<void> main() async {
   // Ensure proper initialization of Flutter bindings
@@ -33,7 +32,6 @@ Future<void> main() async {
 
     // Initialize session
     String sessionId = await SessionService.getOrCreateSessionId();
-    AppLogger.info("Session initialized with ID: $sessionId");
 
     // Run the app inside a try-catch to catch any initialization errors
     runApp(const MyApp());
@@ -65,7 +63,6 @@ class MyApp extends StatelessWidget {
       navigatorKey: Get.key,
       home: Builder(
         builder: (context) {
-          Get.put(Responsive(context), permanent: true);
           return MapScreenPage();
         },
       ),

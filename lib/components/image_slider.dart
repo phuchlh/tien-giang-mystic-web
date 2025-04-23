@@ -2,7 +2,6 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:tien_giang_mystic/utils/responsive.dart';
 
 final List<String> imgList = [
   'https://images.unsplash.com/photo-1520342868574-5fa3804e551c?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=6ff92caffcdd63681a35134a6770ed3b&auto=format&fit=crop&w=1951&q=80',
@@ -18,22 +17,21 @@ class CustomImageSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final responsive = Get.find<Responsive>();
     return SizedBox(
       height: double.infinity,
       child: CarouselSlider(
         options: CarouselOptions(
-          height: responsive.width * 1.5,
+          height: Get.width * 1.5,
           autoPlay: true,
         ),
         items: imgList.map((i) {
           return Builder(
             builder: (BuildContext context) {
               return SizedBox(
-                width: responsive.width * 0.5,
+                width: Get.width * 0.5,
                 child: Image(
                   image: NetworkImage(i),
-                  height: responsive.width * 0.5,
+                  height: Get.width * 0.5,
                 ),
               );
             },

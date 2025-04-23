@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tien_giang_mystic/service/web_storage.dart';
 
 import '../../models/user_metadata_model.dart';
-import '../../service/storage_service.dart';
 import '../../service/supabase_service.dart';
 import '../../utils/app_logger.dart';
 
@@ -13,7 +13,6 @@ class AuthController extends GetxController {
   final RxBool isOpenMenu = false.obs;
   final aiClient = SupabaseService().getAIClient();
   final businessClient = SupabaseService().getBusinessClient();
-  final _storageService = StorageService();
 
   bool get isAuthenticated => _isAuthenticated.value;
   bool get isLoading => _isLoading.value;
@@ -22,37 +21,32 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    onCheckSession();
+    // onCheckSession();
+    print("onInit");
     businessClient.auth.onAuthStateChange.listen((data) {
-      _isAuthenticated.value = data.session != null;
+      final event = data.event;
+      if (event == AuthChangeEvent.signedIn) {
+        onCheckSession();
+        print("User signed in");
+      } else if (event == AuthChangeEvent.signedOut) {
+        user.value = null;
+        _isAuthenticated.value = false;
+        print("User signed out");
+      }
+      print("Auth state changed: $event");
     });
   }
 
-  void onCheckSession() {
+  void onCheckSession() async {
     final session = Supabase.instance.client.auth.currentSession;
     if (session != null) {
-      print('Session found: $session');
       user.value = UserMetaModel.fromMap(session.user.userMetadata ?? {});
-      print('User metadata: ${user.value}');
 
       _isAuthenticated.value = true;
-
-      _storageService.saveTokens(
-        accessToken: session.accessToken,
-        refreshToken: session.refreshToken,
-      );
+      await WebStorage.write("sessionToken", session.accessToken);
+      await WebStorage.write("refreshToken", session.refreshToken ?? "");
     } else {
       print('No session found');
-    }
-  }
-
-  Future<void> _handleTokenRefresh(Session? session) async {
-    if (session != null) {
-      await _storageService.saveTokens(
-        accessToken: session.accessToken,
-        refreshToken: session.refreshToken,
-      );
-      AppLogger.debug('Tokens refreshed and saved');
     }
   }
 
@@ -103,7 +97,8 @@ class AuthController extends GetxController {
       user.value = null;
       _isAuthenticated.value = false;
       _isLoading.value = false;
-      await _storageService.deleteTokens();
+      await WebStorage.delete("sessionToken");
+      await WebStorage.delete("refreshToken");
       await businessClient.auth.signOut();
     } catch (error) {
       AppLogger.error('Sign out error: $error');

@@ -2,21 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tien_giang_mystic/components/image_slider.dart';
 import 'package:tien_giang_mystic/modules/detail_location/detail_location_controller.dart';
-import 'package:tien_giang_mystic/utils/responsive.dart';
 
 class DetailLocationPage extends GetView<DetailLocationController> {
   const DetailLocationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final responsive = Get.find<Responsive>();
     return Scaffold(
       body: CustomScrollView(
         controller: controller.scrollController,
         slivers: [
           // SliverAppBar với hình ảnh và chuyển đổi title động
           SliverAppBar(
-            expandedHeight: responsive.width * 0.6,
+            expandedHeight: Get.width * 0.6,
             pinned: true,
             backgroundColor: Colors.white,
             elevation: 0,
