@@ -4,6 +4,6 @@ import 'package:tien_giang_mystic/modules/auth/auth_controller.dart';
 class AuthBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => AuthController());
+    Get.put(AuthController());
   }
 }

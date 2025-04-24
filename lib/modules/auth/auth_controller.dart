@@ -22,7 +22,6 @@ class AuthController extends GetxController {
   void onInit() {
     super.onInit();
     // onCheckSession();
-    print("onInit");
     businessClient.auth.onAuthStateChange.listen((data) {
       final event = data.event;
       if (event == AuthChangeEvent.signedIn) {

@@ -1,4 +1,4 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers
+// ignore_for_file: no_leading_underscores_for_local_identifiers, constant_identifier_names
 
 import 'dart:async';
 import 'dart:convert';
@@ -12,12 +12,15 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:tien_giang_mystic/utils/app_logger.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/news_model.dart';
 import '../../models/place_model.dart';
 import '../../models/response_message_model.dart';
+import '../../modules/auth/auth_controller.dart';
 import '../../service/n8n_service.dart';
 import '../../service/serper_service.dart';
 import '../../service/session_service.dart';
@@ -27,15 +30,20 @@ import '../../utils/enum.dart';
 
 class MapScreenController extends GetxController
     with GetSingleTickerProviderStateMixin, GetTickerProviderStateMixin {
+  // Storage keys for temporary data
+  static const String TEMP_CHAT_RESPONSE_KEY = 'temp_chat_response';
+  static const String TEMP_CHAT_ID_KEY = 'temp_chat_id';
+  static const String TEMP_GENERATED_PLACES_KEY = 'temp_generated_places';
+
   final aiClient = SupabaseService().getAIClient();
   final businessClient = SupabaseService().getBusinessClient();
+  final AuthController authController = Get.find<AuthController>();
 
   // controllers
   final MapController mapController = MapController();
   final PanelController panelController = PanelController();
   final ScrollController scrollController = ScrollController();
   late TabController tabController;
-  // final AuthController authController = Get.find<AuthController>();
 
   // observables
   final List<PlaceModel> listPlace = <PlaceModel>[].obs;
@@ -45,7 +53,7 @@ class MapScreenController extends GetxController
   late Rx<GetImageStatus> getImageStatus;
   List<String> listImages = <String>[].obs;
   List<News> listSearch = <News>[].obs;
-  Rx<bool> isShowTextfield = true.obs;
+  Rx<bool> isShowTextfield = false.obs;
   List<PlaceModel> listPlaceGenerated = <PlaceModel>[].obs;
   final Rx<EPlaceGenerated> placeGeneratedStatus = EPlaceGenerated.HOLD.obs;
   final RxBool isShowPlaceCard = true.obs;
@@ -97,6 +105,16 @@ class MapScreenController extends GetxController
     dataLoadingStatus = DataLoadingStatus.pending.obs;
     getImageStatus = GetImageStatus.pending.obs;
     OPEN_AI_API_KEY.value = dotenv.env['OPEN_AI_API_KEY'] ?? "";
+
+    // Check for stored data on init
+    _checkStoredData();
+
+    // React to auth state changes
+    ever(authController.user, (user) async {
+      if (user != null) {
+        await onLoginSuccess();
+      }
+    });
   }
 
   @override
@@ -196,7 +214,7 @@ class MapScreenController extends GetxController
         listSearch.assignAll(response);
       }
     } catch (e) {
-      print("Error: $e");
+      AppLogger.error('Error fetching news: $e');
     }
   }
 
@@ -227,7 +245,6 @@ class MapScreenController extends GetxController
         return listImgs;
       }
     } catch (e) {
-      print("Error: $e");
       getImageStatus.value = GetImageStatus.error;
       return [];
     }
@@ -245,83 +262,253 @@ class MapScreenController extends GetxController
   }
 
   void addUserInput() async {
-    final userInput = promptController.text.trim();
-    if (userInput.isEmpty) {
-      isShowTextfield.value = true;
-      return;
-    }
-
-    final ssID = await SessionService.getOrCreateSessionId();
-    final chatId = Uuid().v4();
-    isShowTextfield.value = false;
-    isProcessing.value = true;
-
-    messages.add({
-      'text': userInput,
-      'isUser': true,
-    });
-    promptController.clear();
-
-    var data = {
-      'chatInput': userInput,
-      'sessionID': ssID,
-      'chatID': chatId,
-    };
-
     try {
-      final response =
-          await N8NService.postWithToken(EN8NWebhookType.PROD, data, "token");
-      Logger().i('Webhook response: ${response.data}');
-      if (response.statusCode == 200) {
-        isProcessing.value = false;
-        final responseData = ResponseMessage.fromJson(response.data);
-        listPlaceGenerated = await getDataGenerated(chatId);
-        final chatResponse = responseData.data ?? "Không có dữ liệu trả về";
-        messageGenerated.value = chatResponse;
+      final userInput = promptController.text.trim();
+      if (userInput.isEmpty) {
+        isShowTextfield.value = true;
+        return;
+      }
 
-        messages.add({
-          'text': chatResponse,
-          'isUser': false,
-        });
-      } else {
-        _handleError('Webhook failed with status: ${response.statusCode}');
+      final ssID = await SessionService.getOrCreateSessionId();
+      final chatId = Uuid().v4();
+      isShowTextfield.value = false;
+      isProcessing.value = true;
+
+      messages.add({
+        'text': userInput,
+        'isUser': true,
+      });
+      promptController.clear();
+
+      var data = {
+        'chatInput': userInput,
+        'sessionID': ssID,
+        'chatID': chatId,
+      };
+
+      try {
+        final response =
+            await N8NService.postWithToken(EN8NWebhookType.PROD, data, "token");
+        Logger().i('Webhook response: ${response.data}');
+        if (response.statusCode == 200) {
+          isProcessing.value = false;
+          final responseData = ResponseMessage.fromJson(response.data);
+          listPlaceGenerated = await getDataGenerated(chatId);
+          final chatResponse = responseData.data ?? "Không có dữ liệu trả về";
+          messageGenerated.value = chatResponse;
+
+          // Save temporary data for non-logged in users
+          await saveTemporaryData(
+            chatResponse: chatResponse,
+            chatId: chatId,
+          );
+
+          messages.add({
+            'text': chatResponse,
+            'isUser': false,
+          });
+        } else {
+          _handleError('Webhook failed with status: ${response.statusCode}');
+        }
+      } on DioException catch (e) {
+        String errorMessage;
+        if (e.type == DioExceptionType.connectionError) {
+          errorMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra internet.';
+        } else if (e.type == DioExceptionType.connectionTimeout) {
+          errorMessage = 'Hết thời gian kết nối. Vui lòng thử lại.';
+        } else {
+          errorMessage = 'Lỗi không xác định: ${e.message}';
+        }
+        _handleError(errorMessage);
+        Logger().e('DioException: $e');
       }
-    } on DioException catch (e) {
-      // Xử lý lỗi mạng từ Dio
-      String errorMessage;
-      if (e.type == DioExceptionType.connectionError) {
-        errorMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra internet.';
-      } else if (e.type == DioExceptionType.connectionTimeout) {
-        errorMessage = 'Hết thời gian kết nối. Vui lòng thử lại.';
-      } else {
-        errorMessage = 'Lỗi không xác định: ${e.message}';
-      }
-      _handleError(errorMessage);
-      print('DioException: $e'); // Debug chi tiết
     } catch (e) {
-      _handleError('Lỗi không mong muốn: $e');
-      print('Unexpected error: $e');
+      Logger().e('Error in addUserInput: $e');
+      _handleError('Có lỗi xảy ra khi xử lý yêu cầu của bạn');
     }
   }
 
   Future<List<PlaceModel>> getDataGenerated(String chatID) async {
-    final response = await aiClient
-        .from('message_filter_place')
-        .select()
-        .eq('chat_id', chatID);
+    try {
+      final response = await aiClient
+          .from('message_filter_place')
+          .select()
+          .eq('chat_id', chatID);
 
-    if (response.isNotEmpty) {
-      placeGeneratedStatus.value = EPlaceGenerated.GENERATED;
-      Logger().i('Webhook response: $response');
-      isLoading.value = false;
-      final _listDataGenerated = (response as List)
-          .expand((item) => item['list_data'] as List)
-          .map((e) => PlaceModel.fromJson(e))
-          .toList();
-      return _listDataGenerated;
-    } else {
-      return [];
+      if (response.isNotEmpty) {
+        placeGeneratedStatus.value = EPlaceGenerated.GENERATED;
+        Logger().i('Webhook response: $response');
+        isLoading.value = false;
+        final _listDataGenerated = (response as List)
+            .expand((item) => item['list_data'] as List)
+            .map((e) => PlaceModel.fromJson(e))
+            .toList();
+
+        // Save generated places for non-logged in users
+        await saveTemporaryData(generatedPlaces: _listDataGenerated);
+
+        return _listDataGenerated;
+      }
+    } catch (e) {
+      Logger().e('Error in getDataGenerated: $e');
     }
+    return [];
+  }
+
+  // Check and restore stored data on app init
+  Future<void> _checkStoredData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasStoredData = prefs.containsKey(TEMP_GENERATED_PLACES_KEY);
+
+      if (hasStoredData) {
+        isShowTextfield.value = false;
+
+        final tempData = await getTemporaryData();
+
+        // Restore generated places if available
+        if (tempData['generatedPlaces'] != null) {
+          final places = tempData['generatedPlaces'] as List<PlaceModel>;
+          listPlaceGenerated = places;
+          placeGeneratedStatus.value = EPlaceGenerated.GENERATED;
+          Logger().i('Restored generated places from storage');
+        }
+
+        // Restore chat response if available
+        if (tempData['chatResponse'] != null) {
+          messageGenerated.value = tempData['chatResponse'];
+          messages.add({
+            'text': tempData['chatResponse'],
+            'isUser': false,
+          });
+          Logger().i('Restored chat response from storage');
+        }
+
+        // Clear storage if user is already logged in
+        if (authController.isAuthenticated) {
+          await clearTemporaryData();
+          Logger().i('Cleared temporary storage as user is authenticated');
+        }
+      } else {
+        isShowTextfield.value = true;
+      }
+    } catch (e) {
+      Logger().e('Error checking stored data: $e');
+    }
+  }
+
+  // Handle successful login
+  Future<void> onLoginSuccess() async {
+    try {
+      final tempData = await getTemporaryData();
+
+      // Restore generated places if available
+      if (tempData['generatedPlaces'] != null) {
+        final places = tempData['generatedPlaces'] as List<PlaceModel>;
+        listPlaceGenerated = places;
+        placeGeneratedStatus.value = EPlaceGenerated.GENERATED;
+        Logger().i('Restored generated places after login');
+      }
+
+      // Restore chat response if available
+      if (tempData['chatResponse'] != null) {
+        messageGenerated.value = tempData['chatResponse'];
+        // Prevent duplicate messages
+        if (!messages.any((m) => m['text'] == tempData['chatResponse'])) {
+          messages.add({
+            'text': tempData['chatResponse'],
+            'isUser': false,
+          });
+        }
+        Logger().i('Restored chat response after login');
+      }
+
+      // Clear temporary storage after successful restoration
+      await clearTemporaryData();
+      Logger().i('Cleared temporary storage after login restoration');
+    } catch (e) {
+      Logger().e('Error handling login success: $e');
+    }
+  }
+
+  // Save temporary data for non-logged in users
+  Future<void> saveTemporaryData({
+    String? chatResponse,
+    String? chatId,
+    List<PlaceModel>? generatedPlaces,
+  }) async {
+    if (await isUserLoggedIn()) {
+      Logger().i('User is logged in, skipping temporary storage');
+      return;
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      if (chatResponse != null && chatResponse.isNotEmpty) {
+        await prefs.setString(TEMP_CHAT_RESPONSE_KEY, chatResponse);
+        Logger().i('Saved chat response to temporary storage');
+      }
+
+      if (chatId != null && chatId.isNotEmpty) {
+        await prefs.setString(TEMP_CHAT_ID_KEY, chatId);
+        Logger().i('Saved chat ID to temporary storage');
+      }
+
+      if (generatedPlaces != null && generatedPlaces.isNotEmpty) {
+        final placesJson =
+            generatedPlaces.map((place) => place.toJson()).toList();
+        await prefs.setString(
+            TEMP_GENERATED_PLACES_KEY, json.encode(placesJson));
+        Logger().i('Saved generated places to temporary storage');
+      }
+    } catch (e) {
+      Logger().e('Error saving temporary data: $e');
+    }
+  }
+
+  // Get stored temporary data
+  Future<Map<String, dynamic>> getTemporaryData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final chatResponse = prefs.getString(TEMP_CHAT_RESPONSE_KEY);
+      final chatId = prefs.getString(TEMP_CHAT_ID_KEY);
+      final placesJson = prefs.getString(TEMP_GENERATED_PLACES_KEY);
+
+      List<PlaceModel>? generatedPlaces;
+      if (placesJson != null) {
+        final List<dynamic> decodedPlaces = json.decode(placesJson);
+        generatedPlaces =
+            decodedPlaces.map((json) => PlaceModel.fromJson(json)).toList();
+      }
+
+      return {
+        'chatResponse': chatResponse,
+        'chatId': chatId,
+        'generatedPlaces': generatedPlaces,
+      };
+    } catch (e) {
+      Logger().e('Error getting temporary data: $e');
+      return {};
+    }
+  }
+
+  // Clear temporary storage
+  Future<void> clearTemporaryData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(TEMP_CHAT_RESPONSE_KEY);
+      await prefs.remove(TEMP_CHAT_ID_KEY);
+      await prefs.remove(TEMP_GENERATED_PLACES_KEY);
+      Logger().i('Cleared all temporary storage');
+    } catch (e) {
+      Logger().e('Error clearing temporary data: $e');
+    }
+  }
+
+  // Check if user is logged in
+  Future<bool> isUserLoggedIn() async {
+    return authController.isAuthenticated;
   }
 
   void _handleError(String errorMessage) {

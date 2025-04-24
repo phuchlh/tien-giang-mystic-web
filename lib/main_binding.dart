@@ -12,9 +12,9 @@ class MainBinding extends Bindings {
     // Get.lazyPut<ExploreScreenController>(() => ExploreScreenController());
     // Get.lazyPut<HomeScreenController>(() => HomeScreenController());
     // Get.lazyPut<ProfileScreenController>(() => ProfileScreenController());
+    Get.put(AuthController());
     Get.put(MapScreenController());
     Get.put(ProfileScreenController());
-    Get.put(AuthController());
     Get.lazyPut<DetailLocationController>(() => DetailLocationController(), fenix: true);
   }
 }
