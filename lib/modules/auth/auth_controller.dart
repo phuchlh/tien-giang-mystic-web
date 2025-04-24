@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tien_giang_mystic/service/web_storage.dart';
 
 import '../../models/user_metadata_model.dart';
+import '../../service/session_service.dart';
 import '../../service/supabase_service.dart';
+import '../../service/web_storage.dart';
 import '../../utils/app_logger.dart';
 
 class AuthController extends GetxController {
@@ -46,6 +47,42 @@ class AuthController extends GetxController {
       await WebStorage.write("refreshToken", session.refreshToken ?? "");
     } else {
       print('No session found');
+    }
+  }
+
+  Future<void> postSessionID() async {
+    try {
+      final ssID = await SessionService.getOrCreateSessionId();
+
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      final response =
+          await Supabase.instance.client.from('user_session').insert({
+        'session_id': ssID,
+        'user_id': user.id, // 🟢 Correct UUID from Supabase auth
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      if (response != null && response.error != null) {
+        AppLogger.error('Error posting session ID: ${response.error!.message}');
+        Get.snackbar(
+          'Error',
+          'Failed to post session ID. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        AppLogger.debug('Session ID posted successfully');
+      }
+    } catch (e) {
+      AppLogger.error('Error posting session ID: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to post session ID. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 

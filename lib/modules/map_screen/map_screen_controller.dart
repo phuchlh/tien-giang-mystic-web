@@ -14,6 +14,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tien_giang_mystic/utils/app_logger.dart';
 import 'package:uuid/uuid.dart';
 
@@ -579,6 +580,35 @@ class MapScreenController extends GetxController
       }
     } catch (e) {
       print('TTS Error: $e');
+    }
+  }
+
+  Future<void> onPostLikeTourGenerated() async {
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      final response = await businessClient.from("likes").insert({
+        'user_id': user?.id,
+        'json_location': listPlaceGenerated.map((e) => e.toJson()).toList(),
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      if (response != null && response.error != null) {
+        AppLogger.error(
+            'Error posting like tour generated: ${response.error!.message}');
+        Get.snackbar(
+          'Error',
+          'Failed to post like tour. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        AppLogger.debug('Like tour generated posted successfully');
+        Get.snackbar(
+          'Success',
+          'Tour liked successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      AppLogger.error('Error posting like tour generated: $e');
     }
   }
 }

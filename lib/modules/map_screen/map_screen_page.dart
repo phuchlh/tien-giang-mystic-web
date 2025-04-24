@@ -16,6 +16,7 @@ import '../../utils/constant.dart';
 import '../../utils/enum.dart';
 import '../../utils/gap.dart';
 import '../../utils/images.dart';
+import '../auth/auth_controller.dart';
 import '../auth/auth_widget.dart';
 import 'map_screen_controller.dart';
 import 'widgets/panel_information.dart';
@@ -163,6 +164,7 @@ class _SearchTextField extends GetView<MapScreenController> {
 class _PlaceCardPanel extends GetView<MapScreenController> {
   @override
   Widget build(BuildContext context) {
+    final authControl = Get.find<AuthController>();
     return Obx(() {
       if (controller.placeGeneratedStatus.value != EPlaceGenerated.GENERATED) {
         return const SizedBox.shrink();
@@ -182,20 +184,37 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
                     alignment: Alignment.bottomCenter,
                     child: Column(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: context.theme.cardColor,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: IconButton(
-                            onPressed: () {
-                              controller.togglePlaceCard();
-                            },
-                            icon: Icon(controller.isShowPlaceCard.value
-                                ? Icons.keyboard_arrow_down
-                                : Icons.keyboard_arrow_up),
-                            color: context.iconColor,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: context.theme.cardColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: IconButton(
+                                onPressed: () {
+                                  controller.togglePlaceCard();
+                                },
+                                icon: Icon(controller.isShowPlaceCard.value
+                                    ? Icons.keyboard_arrow_down
+                                    : Icons.keyboard_arrow_up),
+                                color: context.iconColor,
+                              ),
+                            ),
+                            Gap(k8),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: context.theme.cardColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: IconButton(
+                                onPressed: controller.onPostLikeTourGenerated,
+                                icon: Icon(Icons.favorite_border),
+                                color: context.iconColor,
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(
                           height: controller.isShowPlaceCard.value
