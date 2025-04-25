@@ -670,6 +670,7 @@ class MapScreenController extends GetxController
             snackPosition: SnackPosition.BOTTOM,
           );
         }
+        getBookmarkPlace();
       } else {
         final response = await businessClient
             .from("saved_locations")
