@@ -21,38 +21,61 @@ class PanelInformation extends GetView<MapScreenController> {
         ),
         child: Obx(
           () {
+            final isBookmarked = controller.isOnBookmarkList(
+              controller.placeDetail.value.id ?? "",
+            );
             return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: k16),
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        controller.placeDetail.value.placeName ?? '',
-                        style: context.textTheme.titleLarge?.copyWith(
-                          color: context.theme.colorScheme.scrim,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            controller.placeDetail.value.placeName ?? '',
+                            style: context.textTheme.titleLarge?.copyWith(
+                              color: context.theme.colorScheme.scrim,
+                            ),
+                          ),
+                          Gap(k4),
+                          Text(
+                            "Giá vé: ${controller.placeDetail.value.ticket ?? 'Chưa cập nhật'}",
+                            style: context.textTheme.bodyLarge?.copyWith(
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            controller.placeDetail.value.placeLabel ?? '',
+                            style: context.textTheme.bodyLarge?.copyWith(
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            controller.placeDetail.value.openCloseHour ?? '',
+                            style: context.textTheme.bodyLarge?.copyWith(
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
                       ),
-                      Gap(k4),
-                      Text(
-                        "Giá vé: ${controller.placeDetail.value.ticket ?? ''}",
-                        style: context.textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      Text(
-                        controller.placeDetail.value.placeLabel ?? '',
-                        style: context.textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      Text(
-                        controller.placeDetail.value.openCloseHour ?? '',
-                        style: context.textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey.shade600,
+                      IconButton(
+                        onPressed: () {
+                          controller.onPostBookmarkPlace(
+                            locationID: controller.placeDetail.value.id ?? "",
+                          );
+                        },
+                        icon: Icon(
+                          isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                          color: isBookmarked
+                              ? context.theme.colorScheme.primary
+                              : context.theme.colorScheme.scrim,
+                          size: k30,
                         ),
                       ),
                     ],

@@ -15,6 +15,7 @@ import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tien_giang_mystic/models/bookmark_place_model.dart';
 import 'package:tien_giang_mystic/utils/app_logger.dart';
 import 'package:uuid/uuid.dart';
 
@@ -48,6 +49,7 @@ class MapScreenController extends GetxController
 
   // observables
   final List<PlaceModel> listPlace = <PlaceModel>[].obs;
+  final RxList<BookmarkPlace> listPlaceBookmarked = <BookmarkPlace>[].obs;
   final Rx<PlaceModel> placeDetail = PlaceModel().obs;
   late Rx<SlidingStatus> slidingStatus;
   late Rx<DataLoadingStatus> dataLoadingStatus;
@@ -116,6 +118,7 @@ class MapScreenController extends GetxController
         await onLoginSuccess();
       }
     });
+    getBookmarkPlace();
   }
 
   @override
@@ -124,6 +127,34 @@ class MapScreenController extends GetxController
     tabController.dispose();
     promptController.dispose();
     searchController.dispose();
+  }
+
+  Future<void> getBookmarkPlace() async {
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) {
+        AppLogger.error('User not logged in');
+        return;
+      }
+
+      final response = await businessClient
+          .from('saved_locations')
+          .select()
+          .eq('user_id', user.id);
+
+      if (response.isNotEmpty) {
+        listPlaceBookmarked
+            .assignAll(response.map((e) => BookmarkPlace.fromJson(e)).toList());
+      } else {
+        listPlaceBookmarked.clear();
+      }
+    } catch (e) {
+      AppLogger.error('Error fetching bookmark place: $e');
+    }
+  }
+
+  bool isOnBookmarkList(String placeID) {
+    return listPlaceBookmarked.any((place) => place.locationId == placeID);
   }
 
   void togglePlaceCard() => isShowPlaceCard.value = !isShowPlaceCard.value;
@@ -609,6 +640,51 @@ class MapScreenController extends GetxController
       }
     } catch (e) {
       AppLogger.error('Error posting like tour generated: $e');
+    }
+  }
+
+  Future<void> onPostBookmarkPlace({
+    required String locationID,
+  }) async {
+    try {
+      final bookmarked = isOnBookmarkList(locationID);
+      final user = Supabase.instance.client.auth.currentUser;
+      if (!bookmarked) {
+        final response = await businessClient.from("saved_locations").insert({
+          'user_id': user?.id,
+          'location_id': locationID,
+        });
+        if (response != null && response.error != null) {
+          AppLogger.error(
+              'Error posting bookmark place: ${response.error!.message}');
+          Get.snackbar(
+            'Error',
+            'Failed to bookmark place. Please try again.',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        } else {
+          AppLogger.debug('Place bookmarked successfully');
+          Get.snackbar(
+            'Success',
+            'Place bookmarked successfully!',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+      } else {
+        final response = await businessClient
+            .from("saved_locations")
+            .delete()
+            .eq('user_id', user?.id ?? "")
+            .eq('location_id', locationID);
+        if (response != null && response.error != null) {
+          print('Error deleting bookmark place: ${response.error!.message}');
+        } else {
+          listPlaceBookmarked
+              .removeWhere((place) => place.locationId == locationID);
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error posting bookmark place: $e');
     }
   }
 }

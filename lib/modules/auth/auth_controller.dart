@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tien_giang_mystic/modules/map_screen/map_screen_controller.dart';
 
 import '../../models/user_metadata_model.dart';
 import '../../service/session_service.dart';
@@ -27,13 +28,10 @@ class AuthController extends GetxController {
       final event = data.event;
       if (event == AuthChangeEvent.signedIn) {
         onCheckSession();
-        print("User signed in");
       } else if (event == AuthChangeEvent.signedOut) {
         user.value = null;
         _isAuthenticated.value = false;
-        print("User signed out");
       }
-      print("Auth state changed: $event");
     });
   }
 
@@ -45,9 +43,7 @@ class AuthController extends GetxController {
       _isAuthenticated.value = true;
       await WebStorage.write("sessionToken", session.accessToken);
       await WebStorage.write("refreshToken", session.refreshToken ?? "");
-    } else {
-      print('No session found');
-    }
+    } else {}
   }
 
   Future<void> postSessionID() async {
