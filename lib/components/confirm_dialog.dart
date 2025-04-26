@@ -43,7 +43,7 @@ class ConfirmDialog extends StatelessWidget {
           fontWeight: FontWeight.w400,
         ),
       ),
-      actionsAlignment: MainAxisAlignment.spaceEvenly, // Center the buttons
+      actionsAlignment: MainAxisAlignment.spaceEvenly,
       actions: [
         Row(
           children: [
