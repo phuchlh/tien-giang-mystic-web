@@ -688,4 +688,14 @@ class MapScreenController extends GetxController
       AppLogger.error('Error posting bookmark place: $e');
     }
   }
+
+  void clearGeneratedPlaces() {
+    listPlaceGenerated.clear();
+    placeGeneratedStatus.value = EPlaceGenerated.HOLD;
+    messageGenerated.value = "";
+    isShowTextfield.value = true;
+    isProcessing.value = false;
+    chatID.value = '';
+    promptController.clear();
+  }
 }

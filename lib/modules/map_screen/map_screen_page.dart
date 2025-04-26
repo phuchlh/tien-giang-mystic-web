@@ -11,6 +11,7 @@ import 'package:iconify_flutter/icons/ph.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart' as lottie;
 
+import '../../components/confirm_dialog.dart';
 import '../../models/place_model.dart';
 import '../../utils/constant.dart';
 import '../../utils/enum.dart';
@@ -193,6 +194,9 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: IconButton(
+                                tooltip: controller.isShowPlaceCard.value
+                                    ? "Ẩn"
+                                    : "Mở",
                                 onPressed: () {
                                   controller.togglePlaceCard();
                                 },
@@ -209,8 +213,35 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: IconButton(
+                                tooltip: "Thích",
                                 onPressed: controller.onPostLikeTourGenerated,
                                 icon: Icon(Icons.favorite_border),
+                                color: context.iconColor,
+                              ),
+                            ),
+                            Gap(k8),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: context.theme.cardColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: IconButton(
+                                tooltip: "Đóng",
+                                onPressed: () {
+                                  Get.dialog(
+                                    ConfirmDialog(
+                                      title: 'Thông báo',
+                                      content: 'Bạn muốn hủy tour này?',
+                                      onConfirm: () {
+                                        // Perform your close logic here
+                                        controller.clearGeneratedPlaces();
+                                      },
+                                      onCancel: () {},
+                                    ),
+                                    barrierDismissible: false,
+                                  );
+                                },
+                                icon: Icon(Icons.close),
                                 color: context.iconColor,
                               ),
                             ),
