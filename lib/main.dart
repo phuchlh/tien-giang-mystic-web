@@ -30,10 +30,6 @@ Future<void> main() async {
     await supabaseService.init();
     AppLogger.debug("Supabase initialized successfully");
 
-    // Initialize session
-    String sessionId = await SessionService.getOrCreateSessionId();
-
-    // Run the app inside a try-catch to catch any initialization errors
     runApp(const MyApp());
   } catch (e, stackTrace) {
     AppLogger.error('Initialization error: $e\n$stackTrace');
