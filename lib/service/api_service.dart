@@ -43,7 +43,6 @@ class ApiService {
     _dio.options.headers.addAll(headers);
   }
 
-  /// Lấy Base URL tùy theo loại API
   String _getBaseURL(EBaseURLType type) {
     switch (type) {
       case EBaseURLType.N8N_TEST:
