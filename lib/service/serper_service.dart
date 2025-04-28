@@ -6,7 +6,6 @@ import '../models/news_model.dart';
 import '../service/env_services.dart';
 
 class SerperService {
-  // final String apiKey = dotenv.env['SERPER_KEY']!;
   final String serperKey = Env.serperKey;
   final Dio _dio;
 

@@ -6,7 +6,6 @@ import 'dart:html' as html;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -23,13 +22,13 @@ import '../../models/news_model.dart';
 import '../../models/place_model.dart';
 import '../../models/response_message_model.dart';
 import '../../modules/auth/auth_controller.dart';
+import '../../service/env_services.dart';
 import '../../service/n8n_service.dart';
 import '../../service/serper_service.dart';
 import '../../service/session_service.dart';
 import '../../service/supabase_service.dart';
 import '../../utils/constant.dart';
 import '../../utils/enum.dart';
-import '../../service/env_services.dart';
 
 class MapScreenController extends GetxController
     with GetSingleTickerProviderStateMixin, GetTickerProviderStateMixin {
@@ -212,6 +211,7 @@ class MapScreenController extends GetxController
       : panelController.open();
 
   Future<void> _loadLocationData() async {
+    print("url 0100 ${Env.aiURL}");
     final List locationData = await aiClient
         .from('place_destination')
         .select('id, place_name, latitude, longitude, place_image_folder');
@@ -260,7 +260,7 @@ class MapScreenController extends GetxController
         getImageStatus.value = GetImageStatus.loaded;
         return [];
       } else {
-        final projectURL = dotenv.env['SUPABASE_URL_TIEN_GIANG_MYSTIC'];
+        final projectURL = Env.businessURL;
 
         final List<String> listImgs = response
             .where((item) =>

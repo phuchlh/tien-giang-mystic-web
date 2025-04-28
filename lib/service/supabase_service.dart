@@ -1,5 +1,5 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../service/env_services.dart';
 
 class SupabaseService {
@@ -12,18 +12,14 @@ class SupabaseService {
   late final SupabaseClient tgMysticAI;
   late final SupabaseClient tgMysticBusiness;
 
-  // final String aiURL = dotenv.env['SUPABASE_URL_TIEN_GIANG_MYSTIC']!;
-  // final String aiKey = dotenv.env['ANON_KEY_TIEN_GIANG_MYSTIC']!;
-
-  // final String businessURL =
-  //     dotenv.env['SUPABASE_URL_TIEN_GIANG_MYSTIC_BUSINESS']!;
-  // final String businessKey = dotenv.env['ANON_KEY_TIEN_GIANG_MYSTIC_BUSINESS']!;
   final String businessURL = Env.businessURL;
   final String businessKey = Env.businessKey;
   final String aiURL = Env.aiURL;
   final String aiKey = Env.aiKey;
 
   Future<void> init() async {
+    print("businessURL: $businessURL");
+    print("businessKey: $businessKey");
     try {
       // Initialize only once — this is the auth/session client
       await Supabase.initialize(
