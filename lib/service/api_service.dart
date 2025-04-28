@@ -3,15 +3,22 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../utils/enum.dart';
+import '../service/env_services.dart';
 
 class ApiService {
   final Dio _dio;
 
-  final String n8nBase = dotenv.env['N8N_WEBHOOK_BASE_URL']!;
-  final String n8nTest = dotenv.env['N8N_WEBHOOK_TEST_ENPOINT']!;
-  final String n8nProd = dotenv.env['N8N_WEBHOOK_PRODUCTION_ENPOINT']!;
-  final String serper = dotenv.env['SERPER_BASE_URL']!;
-  final String apiKey = dotenv.env['API_KEY']!; // Lấy API Key nếu cần
+  // final String n8nBase = dotenv.env['N8N_WEBHOOK_BASE_URL']!;
+  // final String n8nTest = dotenv.env['N8N_WEBHOOK_TEST_ENPOINT']!;
+  // final String n8nProd = dotenv.env['N8N_WEBHOOK_PRODUCTION_ENPOINT']!;
+  // final String serper = dotenv.env['SERPER_BASE_URL']!;
+  // final String apiKey = dotenv.env['API_KEY']!;
+
+  static final String n8nBase = Env.n8nBase;
+  static final String n8nTest = Env.n8nTest;
+  static final String n8nProd = Env.n8nProd;
+  static final String serper = Env.serper;
+  static final String apiKey = Env.apiKey;
 
   ApiService({String? baseUrl})
       : _dio = Dio(BaseOptions(

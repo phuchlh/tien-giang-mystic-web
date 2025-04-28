@@ -2,16 +2,22 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:tien_giang_mystic/utils/enum.dart';
+import '../service/env_services.dart';
 
 class N8NService {
-  static final String webhookTest = dotenv.env['N8N_WEBHOOK_TEST_ENPOINT']!;
-  static final String webhookProd =
-      dotenv.env['N8N_WEBHOOK_PRODUCTION_ENPOINT']!;
-  static final String endPoint = dotenv.env['N8N_WEBHOOK_BASE_URL']!;
+  // static final String webhookTest = dotenv.env['N8N_WEBHOOK_TEST_ENPOINT']!;
+  // static final String webhookProd =
+  //     dotenv.env['N8N_WEBHOOK_PRODUCTION_ENPOINT']!;
+  // static final String endPoint = dotenv.env['N8N_WEBHOOK_BASE_URL']!;
+
+  static final String baseURL = Env.n8nBase;
+  static final String webhookTest = Env.webhookTest;
+  static final String webhookProd = Env.webhookProd;
+  static final String endPoint = Env.endPoint;
 
   static final _dio = Dio(
     BaseOptions(
-      baseUrl: dotenv.env['N8N_WEBHOOK_BASE_URL'] ?? '',
+      baseUrl: baseURL,
       receiveDataWhenStatusError: false,
       connectTimeout: const Duration(seconds: 180),
       receiveTimeout: const Duration(seconds: 180),

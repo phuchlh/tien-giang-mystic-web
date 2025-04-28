@@ -29,6 +29,7 @@ import '../../service/session_service.dart';
 import '../../service/supabase_service.dart';
 import '../../utils/constant.dart';
 import '../../utils/enum.dart';
+import '../../service/env_services.dart';
 
 class MapScreenController extends GetxController
     with GetSingleTickerProviderStateMixin, GetTickerProviderStateMixin {
@@ -83,7 +84,7 @@ class MapScreenController extends GetxController
     Tab(text: "Tin tức"),
   ];
 
-  late Rx<String> OPEN_AI_API_KEY = "".obs;
+  final String OPEN_AI_API_KEY = Env.openAIAPIKey;
 
   final _serperService = SerperService();
 
@@ -107,7 +108,6 @@ class MapScreenController extends GetxController
     tabController = TabController(length: 3, vsync: this);
     dataLoadingStatus = DataLoadingStatus.pending.obs;
     getImageStatus = GetImageStatus.pending.obs;
-    OPEN_AI_API_KEY.value = dotenv.env['OPEN_AI_API_KEY'] ?? "";
 
     // Check for stored data on init
     _checkStoredData();

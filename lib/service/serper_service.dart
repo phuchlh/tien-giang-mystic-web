@@ -3,10 +3,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../models/news_model.dart';
+import '../service/env_services.dart';
 
 class SerperService {
-  final String apiKey = dotenv.env['SERPER_KEY']!;
-
+  // final String apiKey = dotenv.env['SERPER_KEY']!;
+  final String serperKey = Env.serperKey;
   final Dio _dio;
 
   SerperService()
@@ -39,7 +40,7 @@ class SerperService {
           'gl': 'vn',
           'hl': 'vi',
           'num': 10,
-          'apiKey': apiKey,
+          'apiKey': serperKey,
         },
       );
 
@@ -63,7 +64,7 @@ class SerperService {
           'location': 'Tien+Giang%2C+Vietnam',
           'gl': 'vn',
           'hl': 'vi',
-          'apiKey': apiKey,
+          'apiKey': serperKey,
         },
       );
       return response;

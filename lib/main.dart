@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'main_binding.dart';
 import 'modules/map_screen/map_screen_page.dart';
 import 'route/app_page.dart';
-import 'service/session_service.dart';
 import 'service/supabase_service.dart';
 import 'themes/theme.dart';
 import 'utils/app_logger.dart';
@@ -23,7 +21,7 @@ Future<void> main() async {
 
   try {
     // Load environment variables
-    await dotenv.load(fileName: ".env");
+    // await dotenv.load(fileName: "dotenv");
 
     // Initialize Supabase
     final supabaseService = SupabaseService();
