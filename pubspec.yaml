@@ -98,7 +98,6 @@ flutter:
         - assets/icon/
         - assets/bottom/
         - assets/animated/
-        - .gotenv
         - assets/images/
 
     # To add assets to your application, add an assets section, like this:
