@@ -1,6 +1,6 @@
 class Env {
   static const String aiURL =
-      String.fromEnvironment('SUPABASE_URL_TIEN_GIANG_MYSTIC');
+      String.fromEnvironment('SUPABASE_URL_TIEN_GIANG_MYSTIC_AI');
   static const String aiKey =
       String.fromEnvironment('ANON_KEY_TIEN_GIANG_MYSTIC');
 

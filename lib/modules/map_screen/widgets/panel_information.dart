@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 
 import '../../../utils/gap.dart';
 import '../map_screen_controller.dart';
 import 'news_tab.dart';
 import 'place_description.dart';
 import 'place_image.dart';
+import 'package:iconify_flutter/icons/material_symbols.dart';
+import '../../../components/chip_widget.dart';
 
 class PanelInformation extends GetView<MapScreenController> {
   final ScrollController scrollController;
@@ -24,45 +27,58 @@ class PanelInformation extends GetView<MapScreenController> {
             final isBookmarked = controller.isOnBookmarkList(
               controller.placeDetail.value.id ?? "",
             );
+            final listLabel = controller.onSplitPlaceLabel(
+              controller.placeDetail.value.placeLabel ?? "",
+            );
             return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: k16),
+                  padding: EdgeInsets.symmetric(horizontal: k24, vertical: k14),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            controller.placeDetail.value.placeName ?? '',
-                            style: context.textTheme.titleLarge?.copyWith(
-                              color: context.theme.colorScheme.scrim,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              controller.placeDetail.value.placeName ?? '',
+                              style: context.textTheme.titleLarge?.copyWith(
+                                color: context.theme.colorScheme.scrim,
+                              ),
+                              maxLines: 2,
                             ),
-                          ),
-                          Gap(k4),
-                          Text(
-                            "Giá vé: ${controller.placeDetail.value.ticket ?? 'Chưa cập nhật'}",
-                            style: context.textTheme.bodyLarge?.copyWith(
-                              color: Colors.grey.shade600,
+                            Gap(k10),
+                            _RowText(
+                              icon: Iconify(
+                                MaterialSymbols.location_on_outline_rounded,
+                                color: context.theme.colorScheme.primary,
+                                size: k26,
+                              ),
+                              content:
+                                  controller.placeDetail.value.address ?? '',
                             ),
-                          ),
-                          Text(
-                            controller.placeDetail.value.placeLabel ?? '',
-                            style: context.textTheme.bodyLarge?.copyWith(
-                              color: Colors.grey.shade600,
+                            Gap(k8),
+                            _RowText(
+                              icon: Iconify(
+                                MaterialSymbols.timer_outline_rounded,
+                                color: context.theme.colorScheme.onSurface
+                                    .withOpacity(0.6),
+                                size: k26,
+                              ),
+                              content:
+                                  controller.placeDetail.value.openCloseHour ??
+                                      '',
                             ),
-                          ),
-                          Text(
-                            controller.placeDetail.value.openCloseHour ?? '',
-                            style: context.textTheme.bodyLarge?.copyWith(
-                              color: Colors.grey.shade600,
+                            Gap(k8),
+                            ChipWidget(
+                              listLabel: listLabel,
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       IconButton(
                         onPressed: () {
@@ -106,6 +122,32 @@ class PanelInformation extends GetView<MapScreenController> {
           },
         ),
       ),
+    );
+  }
+}
+
+class _RowText extends StatelessWidget {
+  final Widget icon;
+  final String content;
+  const _RowText({
+    super.key,
+    required this.icon,
+    required this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        icon,
+        Gap(k8),
+        Text(
+          content,
+          style: context.textTheme.bodyLarge?.copyWith(
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -14,6 +14,7 @@ import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tien_giang_mystic/components/confirm_dialog.dart';
 import 'package:tien_giang_mystic/models/bookmark_place_model.dart';
 import 'package:tien_giang_mystic/utils/app_logger.dart';
 import 'package:uuid/uuid.dart';
@@ -260,7 +261,7 @@ class MapScreenController extends GetxController
         getImageStatus.value = GetImageStatus.loaded;
         return [];
       } else {
-        final projectURL = Env.businessURL;
+        final projectURL = Env.aiURL;
 
         final List<String> listImgs = response
             .where((item) =>
@@ -649,6 +650,20 @@ class MapScreenController extends GetxController
     try {
       final bookmarked = isOnBookmarkList(locationID);
       final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) {
+        Get.dialog(
+          ConfirmDialog(
+            title: 'Thông báo',
+            content: 'Bạn cần đăng nhập để thực hiện chức năng này',
+            onConfirm: () {
+              final authController = Get.find<AuthController>();
+              authController.signInWithGoogle();
+              Get.back();
+            },
+          ),
+          barrierDismissible: false,
+        );
+      }
       if (!bookmarked) {
         final response = await businessClient.from("saved_locations").insert({
           'user_id': user?.id,

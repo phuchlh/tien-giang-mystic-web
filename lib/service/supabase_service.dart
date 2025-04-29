@@ -19,7 +19,7 @@ class SupabaseService {
 
   Future<void> init() async {
     print("businessURL: $businessURL");
-    print("businessKey: $businessKey");
+    print("aiURL: $aiURL");
     try {
       // Initialize only once — this is the auth/session client
       await Supabase.initialize(

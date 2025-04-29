@@ -15,18 +15,13 @@ class PlaceDescription extends GetView<MapScreenController> {
       builder: (controller) => Obx(
         () {
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: k14, vertical: k10),
+            padding: EdgeInsets.symmetric(horizontal: k24, vertical: k18),
             child: SingleChildScrollView(
               controller: scrollController,
-              child: ReadMoreText(
+              child: Text(
                 controller.placeDetail.value.description ?? "",
-                trimLines: 5,
-                colorClickableText: context.theme.primaryColor,
-                trimMode: TrimMode.Line,
-                trimCollapsedText: 'Xem thêm',
-                trimExpandedText: 'Thu gọn',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 17,
                   color: Colors.black.withOpacity(0.8),
                 ),
               ),

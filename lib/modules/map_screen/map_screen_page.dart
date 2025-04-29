@@ -21,6 +21,7 @@ import '../auth/auth_controller.dart';
 import '../auth/auth_widget.dart';
 import 'map_screen_controller.dart';
 import 'widgets/panel_information.dart';
+import '../../components/chip_widget.dart';
 
 class MapScreenPage extends GetView<MapScreenController> {
   const MapScreenPage({super.key});
@@ -247,16 +248,13 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
                             ),
                           ],
                         ),
-                        SizedBox(
-                          height: controller.isShowPlaceCard.value
-                              ? Get.height * 0.43
-                              : 0,
+                        IntrinsicHeight(
                           child: Row(
                             children: [
                               // 🧾 Scrollable Container
                               Expanded(
                                 child: Container(
-                                  height: Get.height * 0.43,
+                                  height: Get.height * 0.259,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     boxShadow: [
@@ -282,10 +280,8 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
                                       itemCount:
                                           controller.listPlaceGenerated.length,
                                       itemBuilder: (context, index) {
-                                        return Container(
-                                          width: Get.width * 0.3,
-                                          margin:
-                                              const EdgeInsets.only(bottom: 8),
+                                        return SizedBox(
+                                          width: Get.width * 0.25,
                                           child: _PlaceCard(
                                             placeItem: controller
                                                 .listPlaceGenerated[index],
@@ -432,44 +428,24 @@ class _PlaceCard extends GetView<MapScreenController> {
             Text(placeItem.placeName ?? "",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              children: listLabel.map((e) {
-                return Chip(
-                  label: Text(e),
-                  labelStyle: TextStyle(
-                    color: context.theme.colorScheme.onSecondaryFixed,
-                  ),
-                  backgroundColor:
-                      context.theme.colorScheme.inversePrimary.withAlpha(100),
-                  shape: StadiumBorder(
-                    side: BorderSide(
-                      color: context.theme.colorScheme.inversePrimary
-                          .withAlpha(100), // Đổi sang màu bạn muốn
-                      width: 1.5,
-                    ),
-                  ),
-                );
-              }).toList(),
+            ChipWidget(listLabel: listLabel),
+            Gap(k8),
+            _TitleWidget(
+              content: placeItem.address ?? "Chưa cập nhật",
+              prefixIcon: "📍",
             ),
-            SizedBox(height: 8),
-            Text("📍 ${placeItem.address}",
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.theme.colorScheme.onSecondaryFixed,
-                )),
-
-            Text("🕒 ${placeItem.openCloseHour}",
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.theme.colorScheme.onSecondaryFixed,
-                )),
-            Text("⏱️ ${placeItem.visitTime}",
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.theme.colorScheme.onSecondaryFixed,
-                )),
-            Text("📞 ${placeItem.phoneNumber}",
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.theme.colorScheme.onSecondaryFixed,
-                )),
+            _TitleWidget(
+              content: placeItem.openCloseHour ?? "Chưa cập nhật",
+              prefixIcon: "🕒",
+            ),
+            _TitleWidget(
+              content: placeItem.visitTime ?? "Chưa cập nhật",
+              prefixIcon: "🕒",
+            ),
+            _TitleWidget(
+              content: placeItem.phoneNumber ?? "Chưa cập nhật",
+              prefixIcon: "📞",
+            ),
             Gap(k8),
             Row(
               children: [
@@ -483,15 +459,6 @@ class _PlaceCard extends GetView<MapScreenController> {
               ],
             ),
             Gap(k8),
-            // display placeItem.description and make sure it is within the limits of the card
-            Flexible(
-              child: Text(
-                placeItem.description ?? "",
-                // overflow: TextOverflow.ellipsis,
-                // maxLines: 6,
-                style: TextStyle(color: Colors.grey[700]),
-              ),
-            ),
           ],
         ),
       ),
@@ -499,59 +466,70 @@ class _PlaceCard extends GetView<MapScreenController> {
   }
 }
 
-class _MarkerPlace extends GetView<MapScreenController> {
-  const _MarkerPlace({super.key});
+class _TitleWidget extends StatelessWidget {
+  final String content;
+  final String prefixIcon;
+  const _TitleWidget(
+      {super.key, required this.content, required this.prefixIcon});
+
   @override
   Widget build(BuildContext context) {
-    late final List<PlaceModel> places;
+    return Text("$prefixIcon $content",
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textTheme.bodyMedium?.copyWith(
+          color: context.theme.colorScheme.onSecondaryFixed,
+        ));
+  }
+}
 
-    switch (controller.placeGeneratedStatus) {
-      case EPlaceGenerated.HOLD:
-        places = controller.listPlace;
-        break;
-      case EPlaceGenerated.GENERATED:
-        places = controller.listPlaceGenerated;
-        break;
-      default:
-        places = controller.listPlace;
-        break;
-    }
+class _MarkerPlace extends GetView<MapScreenController> {
+  const _MarkerPlace({super.key});
 
-    final markers = places
-        .where((e) => e.latitude != null && e.longitude != null)
-        .map(
-          (e) => Marker(
-            width: k50,
-            height: k50,
-            point: LatLng(
-              e.latitude ?? Constant.TIEN_GIANG_LATITUDE,
-              e.longitude ?? Constant.TIEN_GIANG_LONGITUDE,
-            ),
-            child: GestureDetector(
-              onTap: () {
-                controller.animatedMapMove(
-                  LatLng(
-                    e.latitude ?? Constant.TIEN_GIANG_LATITUDE,
-                    e.longitude ?? Constant.TIEN_GIANG_LONGITUDE,
-                  ),
-                  16.0,
-                );
-                controller.loadSpecificLocationData(e);
-                showDialog(
-                  context: context,
-                  builder: (context) => _DialogDetail(),
-                );
-              },
-              child: const Icon(
-                Icons.location_pin,
-                color: Colors.blue,
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final List<PlaceModel> places =
+          controller.placeGeneratedStatus.value == EPlaceGenerated.GENERATED
+              ? controller.listPlaceGenerated
+              : controller.listPlace;
+
+      final markers = places
+          .where((e) => e.latitude != null && e.longitude != null)
+          .map(
+            (e) => Marker(
+              width: k50,
+              height: k50,
+              point: LatLng(
+                e.latitude ?? Constant.TIEN_GIANG_LATITUDE,
+                e.longitude ?? Constant.TIEN_GIANG_LONGITUDE,
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  controller.animatedMapMove(
+                    LatLng(
+                      e.latitude ?? Constant.TIEN_GIANG_LATITUDE,
+                      e.longitude ?? Constant.TIEN_GIANG_LONGITUDE,
+                    ),
+                    16.0,
+                  );
+                  controller.loadSpecificLocationData(e);
+                  showDialog(
+                    context: context,
+                    builder: (context) => _DialogDetail(),
+                  );
+                },
+                child: const Icon(
+                  Icons.location_pin,
+                  color: Colors.blue,
+                ),
               ),
             ),
-          ),
-        )
-        .toList();
+          )
+          .toList();
 
-    return MarkerLayer(markers: markers);
+      return MarkerLayer(markers: markers);
+    });
   }
 }
 

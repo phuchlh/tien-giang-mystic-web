@@ -1,17 +1,18 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../models/news_model.dart';
 import '../service/env_services.dart';
 
 class SerperService {
-  final String serperKey = Env.serperKey;
+  static const String serperKey = Env.serperKey;
+
+  static const String serperURL = Env.serper;
   final Dio _dio;
 
   SerperService()
       : _dio = Dio(BaseOptions(
-          baseUrl: 'https://google.serper.dev',
+          baseUrl: serperURL,
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
         )) {
