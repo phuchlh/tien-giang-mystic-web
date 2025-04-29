@@ -17,7 +17,6 @@ class Env {
       String.fromEnvironment('N8N_WEBHOOK_PRODUCTION_ENPOINT');
   static const String serper = String.fromEnvironment('SERPER_BASE_URL');
   static const String apiKey = String.fromEnvironment('API_KEY');
-
   static const String webhookTest =
       String.fromEnvironment('N8N_WEBHOOK_TEST_ENPOINT');
   static const String webhookProd =
