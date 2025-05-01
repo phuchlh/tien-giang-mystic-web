@@ -47,3 +47,5 @@ enum EButtonClickType {
   NEXT,
   BACK,
 }
+
+enum EPlayType { INIT, GENERATING, PLAY, PAUSE, STOP }

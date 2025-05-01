@@ -359,14 +359,35 @@ class _InfoPlacePanel extends GetView<MapScreenController> {
                               color: context.theme.cardColor,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: IconButton(
-                              tooltip: "Phát",
-                              onPressed: () {
-                                controller.toggleDescription();
-                              },
-                              icon: Iconify(Ph.speaker_high_light),
-                              color: context.iconColor,
-                            ),
+                            child: Obx(() {
+                              final state = controller.playType.value;
+                              String iconName;
+                              switch (state) {
+                                case EPlayType.PLAY:
+                                  iconName = Ph.pause_circle_light;
+                                  break;
+                                case EPlayType.PAUSE:
+                                  iconName = Ph.play_circle_light;
+                                  break;
+                                case EPlayType.GENERATING:
+                                  iconName = Ph.spinner_light;
+                                  break;
+                                case EPlayType.STOP:
+                                case EPlayType.INIT:
+                                default:
+                                  iconName = Ph.speaker_high_light;
+                                  break;
+                              }
+
+                              return IconButton(
+                                onPressed: () {
+                                  controller.handleTTS(
+                                      controller.messageGenerated.value);
+                                },
+                                icon: Iconify(iconName),
+                                color: context.iconColor,
+                              );
+                            }),
                           ),
                         ),
                       ],

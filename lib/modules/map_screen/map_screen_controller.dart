@@ -48,6 +48,8 @@ class MapScreenController extends GetxController
   final ScrollController scrollController = ScrollController();
   late TabController tabController;
 
+  html.AudioElement? _audioPlayer;
+
   // observables
   final List<PlaceModel> listPlace = <PlaceModel>[].obs;
   final RxList<BookmarkPlace> listPlaceBookmarked = <BookmarkPlace>[].obs;
@@ -62,6 +64,7 @@ class MapScreenController extends GetxController
   final Rx<EPlaceGenerated> placeGeneratedStatus = EPlaceGenerated.HOLD.obs;
   final RxBool isShowPlaceCard = true.obs;
   final RxBool isShowDescription = true.obs;
+  final Rx<EPlayType> playType = EPlayType.INIT.obs;
 
   final TextEditingController promptController = TextEditingController();
   final RxList<String> suggestions = <String>[].obs;
@@ -585,6 +588,73 @@ class MapScreenController extends GetxController
     }
   }
 
+  Future<void> handleTTS(String text) async {
+    try {
+      switch (playType.value) {
+        case EPlayType.INIT:
+          playType.value = EPlayType.GENERATING;
+          await generateTextToSpeech(text);
+          break;
+
+        case EPlayType.GENERATING:
+          // ignore while loading
+          break;
+
+        case EPlayType.PLAY:
+          _audioPlayer?.pause();
+          playType.value = EPlayType.PAUSE;
+          break;
+
+        case EPlayType.PAUSE:
+          _audioPlayer?.play();
+          playType.value = EPlayType.PLAY;
+          break;
+
+        case EPlayType.STOP:
+          _audioPlayer?.pause();
+          _audioPlayer?.currentTime = 0;
+          playType.value = EPlayType.INIT;
+          break;
+      }
+    } catch (e) {
+      print('handleTTS error: $e');
+      playType.value = EPlayType.INIT;
+    }
+  }
+
+  // Future<void> generateTextToSpeech(String text) async {
+  //   try {
+  //     final uri = Uri.parse("https://api.openai.com/v1/audio/speech");
+
+  //     final headers = {
+  //       "Authorization": "Bearer $OPEN_AI_API_KEY",
+  //       "Content-Type": "application/json"
+  //     };
+
+  //     final body = jsonEncode({
+  //       "model": "tts-1", // or "tts-1-hd" for higher quality
+  //       "input": text,
+  //       "voice": "coral" // coral
+  //     });
+
+  //     final response = await http.post(uri, headers: headers, body: body);
+
+  //     if (response.statusCode == 200) {
+  //       // Create a Blob and download/play the audio
+  //       final blob = html.Blob([response.bodyBytes], 'audio/mpeg');
+  //       final url = html.Url.createObjectUrlFromBlob(blob);
+  //       final audio = html.AudioElement()
+  //         ..src = url
+  //         ..autoplay = true;
+  //       audio.play();
+  //     } else {
+  //       print("Failed: ${response.statusCode} - ${response.body}");
+  //     }
+  //   } catch (e) {
+  //     print('TTS Error: $e');
+  //   }
+  // }
+
   Future<void> generateTextToSpeech(String text) async {
     try {
       final uri = Uri.parse("https://api.openai.com/v1/audio/speech");
@@ -595,26 +665,37 @@ class MapScreenController extends GetxController
       };
 
       final body = jsonEncode({
-        "model": "tts-1", // or "tts-1-hd" for higher quality
-        "input": "dùng để tạo giọng nói",
-        "voice": "sage" // coral
+        "model": "tts-1",
+        "input": "đoạn check dài hơn gần 300 chữ",
+        "voice": "coral"
       });
 
       final response = await http.post(uri, headers: headers, body: body);
 
       if (response.statusCode == 200) {
-        // Create a Blob and download/play the audio
         final blob = html.Blob([response.bodyBytes], 'audio/mpeg');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final audio = html.AudioElement()
+
+        _audioPlayer?.pause();
+        _audioPlayer?.remove();
+
+        _audioPlayer = html.AudioElement()
           ..src = url
           ..autoplay = true;
-        audio.play();
+
+        _audioPlayer!.onEnded.listen((event) {
+          playType.value = EPlayType.STOP;
+        });
+
+        await _audioPlayer!.play();
+        playType.value = EPlayType.PLAY;
       } else {
-        print("Failed: ${response.statusCode} - ${response.body}");
+        print("TTS Failed: ${response.statusCode} - ${response.body}");
+        playType.value = EPlayType.INIT;
       }
     } catch (e) {
       print('TTS Error: $e');
+      playType.value = EPlayType.INIT;
     }
   }
 
