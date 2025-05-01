@@ -22,6 +22,8 @@ import '../auth/auth_widget.dart';
 import 'map_screen_controller.dart';
 import 'widgets/panel_information.dart';
 import '../../components/chip_widget.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ph.dart';
 
 class MapScreenPage extends GetView<MapScreenController> {
   const MapScreenPage({super.key});
@@ -67,6 +69,7 @@ class MapScreenPage extends GetView<MapScreenController> {
                 AuthWidget(),
                 _SearchTextField(),
                 _PlaceCardPanel(),
+                _InfoPlacePanel(),
                 Obx(() {
                   if (controller.isProcessing.value) {
                     // show loading with lottie and black background
@@ -171,177 +174,214 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
         return const SizedBox.shrink();
       }
 
-      return Stack(
-        children: [
-          Positioned(
-              bottom: 10,
-              left: -10,
-              right: -10,
-              child: Obx(
-                () {
-                  return AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    alignment: Alignment.bottomCenter,
-                    child: Column(
+      return Positioned(
+        bottom: 10,
+        left: -10,
+        right: -10,
+        child: Obx(
+          () {
+            return Container(
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                alignment: Alignment.bottomCenter,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: context.theme.cardColor,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: IconButton(
-                                tooltip: controller.isShowPlaceCard.value
-                                    ? "Ẩn"
-                                    : "Mở",
-                                onPressed: () {
-                                  controller.togglePlaceCard();
-                                },
-                                icon: Icon(controller.isShowPlaceCard.value
-                                    ? Icons.keyboard_arrow_down
-                                    : Icons.keyboard_arrow_up),
-                                color: context.iconColor,
-                              ),
-                            ),
-                            Gap(k8),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: context.theme.cardColor,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: IconButton(
-                                tooltip: "Thích",
-                                onPressed: controller.onPostLikeTourGenerated,
-                                icon: Icon(Icons.favorite_border),
-                                color: context.iconColor,
-                              ),
-                            ),
-                            Gap(k8),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: context.theme.cardColor,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: IconButton(
-                                tooltip: "Đóng",
-                                onPressed: () {
-                                  Get.dialog(
-                                    ConfirmDialog(
-                                      title: 'Thông báo',
-                                      content: 'Bạn muốn hủy tour này?',
-                                      onConfirm: () {
-                                        // Perform your close logic here
-                                        controller.clearGeneratedPlaces();
-                                      },
-                                      onCancel: () {},
-                                    ),
-                                    barrierDismissible: false,
-                                  );
-                                },
-                                icon: Icon(Icons.close),
-                                color: context.iconColor,
-                              ),
-                            ),
-                          ],
+                        Container(
+                          decoration: BoxDecoration(
+                            color: context.theme.cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: IconButton(
+                            tooltip:
+                                controller.isShowPlaceCard.value ? "Ẩn" : "Mở",
+                            onPressed: () {
+                              controller.togglePlaceCard();
+                            },
+                            icon: Icon(controller.isShowPlaceCard.value
+                                ? Icons.keyboard_arrow_down
+                                : Icons.keyboard_arrow_up),
+                            color: context.iconColor,
+                          ),
                         ),
-                        controller.isShowPlaceCard.value
-                            ? Row(
-                                children: [
-                                  // 🧾 Scrollable Container
-                                  Expanded(
-                                    child: Container(
-                                      height: Get.height * 0.268,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.1),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ScrollConfiguration(
-                                        behavior:
-                                            ScrollConfiguration.of(context)
-                                                .copyWith(
-                                          dragDevices: {
-                                            PointerDeviceKind.touch,
-                                            PointerDeviceKind.mouse,
-                                          },
-                                          scrollbars: true,
-                                        ),
-                                        child: ListView.builder(
-                                          controller:
-                                              controller.scrollController,
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: controller
-                                              .listPlaceGenerated.length,
-                                          itemBuilder: (context, index) {
-                                            return SizedBox(
-                                              width: Get.width * 0.25,
-                                              child: _PlaceCard(
-                                                placeItem: controller
-                                                    .listPlaceGenerated[index],
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : const SizedBox.shrink(),
+                        Gap(k8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: context.theme.cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: IconButton(
+                            tooltip: "Thích",
+                            onPressed: controller.onPostLikeTourGenerated,
+                            icon: Icon(Icons.favorite_border),
+                            color: context.iconColor,
+                          ),
+                        ),
+                        Gap(k8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: context.theme.cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: IconButton(
+                            tooltip: "Đóng",
+                            onPressed: () {
+                              Get.dialog(
+                                ConfirmDialog(
+                                  title: 'Thông báo',
+                                  content: 'Bạn muốn hủy tour này?',
+                                  onConfirm: () {
+                                    controller.clearGeneratedPlaces();
+                                  },
+                                  onCancel: () {},
+                                ),
+                                barrierDismissible: false,
+                              );
+                            },
+                            icon: Icon(Icons.close),
+                            color: context.iconColor,
+                          ),
+                        ),
                       ],
                     ),
-                  );
-                },
-              )),
-          Positioned(
-              top: 60,
-              right: 20,
-              child: SizedBox(
-                width: k50,
-                height: k50,
-                child: SpeedDial(
-                  direction: SpeedDialDirection.down,
-                  icon: Icons.settings,
-                  activeIcon: Icons.close,
-                  backgroundColor: context.theme.primaryColor,
-                  foregroundColor: context.theme.colorScheme.onPrimary,
-                  overlayColor: context.theme.colorScheme.onPrimary,
-                  overlayOpacity: 0.3,
-                  childrenButtonSize: const Size(50, 50),
-                  children: [
-                    SpeedDialChild(
-                      label: "Thuyết minh",
-                      child: Iconify(Ph.speaker_high_light),
-                      onTap: () {
-                        controller.generateTextToSpeech(
-                            controller.messageGenerated.value);
-                      },
-                    ),
-                    SpeedDialChild(
-                      label: "Đọc nội dung",
-                      child: Iconify(Ph.book_open_light),
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => _MarkdownDialog(),
-                        );
-                      },
-                    ),
+                    controller.isShowPlaceCard.value
+                        ? Row(
+                            children: [
+                              // 🧾 Scrollable Container
+                              Expanded(
+                                child: Container(
+                                  height: Get.height * 0.268,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ScrollConfiguration(
+                                    behavior: ScrollConfiguration.of(context)
+                                        .copyWith(
+                                      dragDevices: {
+                                        PointerDeviceKind.touch,
+                                        PointerDeviceKind.mouse,
+                                      },
+                                      scrollbars: true,
+                                    ),
+                                    child: ListView.builder(
+                                      controller: controller.scrollController,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount:
+                                          controller.listPlaceGenerated.length,
+                                      itemBuilder: (context, index) {
+                                        return SizedBox(
+                                          width: Get.width * 0.25,
+                                          child: _PlaceCard(
+                                            placeItem: controller
+                                                .listPlaceGenerated[index],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : const SizedBox.shrink(),
                   ],
                 ),
-              )),
-        ],
+              ),
+            );
+          },
+        ),
       );
     });
+  }
+}
+
+class _InfoPlacePanel extends GetView<MapScreenController> {
+  const _InfoPlacePanel({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () {
+        if (controller.placeGeneratedStatus.value !=
+            EPlaceGenerated.GENERATED) {
+          return const SizedBox.shrink();
+        }
+        return Positioned(
+          right: 0,
+          top: 40,
+          child: Obx(() {
+            return SizedBox(
+              height: Get.height * 0.5,
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                alignment: Alignment.topRight,
+                child: Row(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: context.theme.cardColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: IconButton(
+                              tooltip: controller.isShowDescription.value
+                                  ? "Ẩn"
+                                  : "Mở",
+                              onPressed: () {
+                                controller.toggleDescription();
+                              },
+                              icon: Icon(controller.isShowDescription.value
+                                  ? Icons.keyboard_arrow_right
+                                  : Icons.keyboard_arrow_left),
+                              color: context.iconColor,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: context.theme.cardColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: IconButton(
+                              tooltip: "Phát",
+                              onPressed: () {
+                                controller.toggleDescription();
+                              },
+                              icon: Iconify(Ph.speaker_high_light),
+                              color: context.iconColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    controller.isShowDescription.value
+                        ? _MarkdownContainer()
+                        : const SizedBox.shrink()
+                  ],
+                ),
+              ),
+            );
+          }),
+        );
+      },
+    );
   }
 }
 
@@ -549,32 +589,56 @@ class _MarkerPlace extends GetView<MapScreenController> {
   }
 }
 
-class _MarkdownDialog extends GetView<MapScreenController> {
-  const _MarkdownDialog({super.key});
+class _MarkdownContainer extends GetView<MapScreenController> {
+  const _MarkdownContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      insetPadding: EdgeInsets.all(16),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 600, maxHeight: 600),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Obx(
-                  () => Markdown(
-                    // copyable
-                    selectable: true,
-                    data: controller.messageGenerated.value,
+    return Container(
+      decoration: BoxDecoration(
+        color: context.theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      height: Get.height * 0.5,
+      width: Get.width * 0.35,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Obx(
+                () => Markdown(
+                  // copyable
+                  selectable: true,
+                  data: controller.messageGenerated.value,
+                  styleSheet: MarkdownStyleSheet(
+                    h1: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: context.theme.colorScheme.onSecondaryFixed,
+                    ),
+                    p: TextStyle(
+                      fontSize: 16,
+                      color: context.theme.colorScheme.onSecondaryFixed,
+                    ),
+                    a: TextStyle(
+                      color: context.theme.primaryColor,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

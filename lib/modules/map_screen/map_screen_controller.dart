@@ -61,6 +61,7 @@ class MapScreenController extends GetxController
   List<PlaceModel> listPlaceGenerated = <PlaceModel>[].obs;
   final Rx<EPlaceGenerated> placeGeneratedStatus = EPlaceGenerated.HOLD.obs;
   final RxBool isShowPlaceCard = true.obs;
+  final RxBool isShowDescription = true.obs;
 
   final TextEditingController promptController = TextEditingController();
   final RxList<String> suggestions = <String>[].obs;
@@ -158,6 +159,8 @@ class MapScreenController extends GetxController
   }
 
   void togglePlaceCard() => isShowPlaceCard.value = !isShowPlaceCard.value;
+  void toggleDescription() =>
+      isShowDescription.value = !isShowDescription.value;
 
   void onClickButton(EButtonClickType type) {
     if (type == EButtonClickType.NEXT) {
