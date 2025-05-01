@@ -254,7 +254,7 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
                               // 🧾 Scrollable Container
                               Expanded(
                                 child: Container(
-                                  height: Get.height * 0.259,
+                                  height: Get.height * 0.268,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     boxShadow: [
@@ -425,11 +425,23 @@ class _PlaceCard extends GetView<MapScreenController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(placeItem.placeName ?? "",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            ChipWidget(listLabel: listLabel),
-            Gap(k8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Tooltip(
+                  message: placeItem.placeName ?? "",
+                  child: Text(
+                    placeItem.placeName ?? "",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                SizedBox(height: 8),
+                ChipWidget(listLabel: listLabel),
+              ],
+            ),
+            Gap(k20),
             _TitleWidget(
               content: placeItem.address ?? "Chưa cập nhật",
               prefixIcon: "📍",
@@ -474,12 +486,14 @@ class _TitleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text("$prefixIcon $content",
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: context.theme.colorScheme.onSecondaryFixed,
-        ));
+    return Text(
+      "$prefixIcon $content",
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: context.textTheme.bodyMedium?.copyWith(
+        color: context.theme.colorScheme.onSecondaryFixed,
+      ),
+    );
   }
 }
 

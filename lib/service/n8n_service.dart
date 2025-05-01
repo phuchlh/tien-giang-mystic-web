@@ -14,20 +14,20 @@ class N8NService {
     BaseOptions(
       baseUrl: baseURL,
       receiveDataWhenStatusError: false,
-      connectTimeout: const Duration(seconds: 180),
-      receiveTimeout: const Duration(seconds: 180),
+      connectTimeout: const Duration(seconds: 300),
+      receiveTimeout: const Duration(seconds: 300),
     ),
-  )..interceptors.add(
+  )..interceptors.addAll([
       PrettyDioLogger(
+        request: true,
         requestHeader: true,
-        requestBody: true,
+        responseHeader: true,
         responseBody: true,
-        responseHeader: false,
         error: true,
-        compact: true,
-        maxWidth: 90,
+        compact: false,
+        requestBody: true,
       ),
-    );
+    ]);
 
   static postWithToken(EN8NWebhookType type, body, token) async {
     final typeUrl = type == EN8NWebhookType.TEST ? webhookTest : webhookProd;

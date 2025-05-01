@@ -8,26 +8,33 @@ class ChipWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: k8,
-      runSpacing: k10,
-      children: listLabel.map((e) {
-        return Chip(
-          label: Text(e),
-          labelStyle: TextStyle(
-            color: context.theme.colorScheme.onSecondaryFixed,
-          ),
-          backgroundColor:
-              context.theme.colorScheme.inversePrimary.withAlpha(100),
-          shape: StadiumBorder(
-            side: BorderSide(
-              color: context.theme.colorScheme.inversePrimary
-                  .withAlpha(100), // Đổi sang màu bạn muốn
-              width: 1.5,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: listLabel.map((e) {
+          return Padding(
+            padding: EdgeInsets.only(right: k6),
+            child: Chip(
+              labelPadding: const EdgeInsets.all(0),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              label: Text(e),
+              labelStyle: TextStyle(
+                color: context.theme.colorScheme.onSecondaryFixed,
+                fontSize: 14,
+              ),
+              backgroundColor:
+                  context.theme.colorScheme.inversePrimary.withAlpha(100),
+              shape: StadiumBorder(
+                side: BorderSide(
+                  color:
+                      context.theme.colorScheme.inversePrimary.withAlpha(100),
+                  width: 1,
+                ),
+              ),
             ),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 }

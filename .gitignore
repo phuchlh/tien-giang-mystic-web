@@ -50,4 +50,4 @@ app.*.map.json
 
 .cursor
 
-/web/index.html
+/web/

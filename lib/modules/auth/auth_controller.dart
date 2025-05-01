@@ -26,11 +26,15 @@ class AuthController extends GetxController {
     // onCheckSession();
     businessClient.auth.onAuthStateChange.listen((data) {
       final event = data.event;
+
+      AppLogger.debug('User signed in: $data');
       if (event == AuthChangeEvent.signedIn) {
         onCheckSession();
       } else if (event == AuthChangeEvent.signedOut) {
         user.value = null;
         _isAuthenticated.value = false;
+      } else if (data.session?.user != null) {
+        onCheckSession();
       }
     });
   }
@@ -98,7 +102,7 @@ class AuthController extends GetxController {
       AppLogger.debug('Starting Google sign-in...');
       final response = await businessClient.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: kIsWeb ? null : 'http://localhost:3000',
+        // redirectTo: kIsWeb ? null : 'http://localhost:3000',
         authScreenLaunchMode: kIsWeb
             ? LaunchMode.platformDefault
             : LaunchMode.externalApplication,

@@ -618,8 +618,24 @@ class MapScreenController extends GetxController
   Future<void> onPostLikeTourGenerated() async {
     try {
       final user = Supabase.instance.client.auth.currentUser;
+      print('User: $user');
+      if (user == null) {
+        Get.dialog(
+          ConfirmDialog(
+            title: 'Thông báo',
+            content: 'Bạn cần đăng nhập để thực hiện chức năng này',
+            onConfirm: () {
+              final authController = Get.find<AuthController>();
+              authController.signInWithGoogle();
+              Get.back();
+            },
+          ),
+          barrierDismissible: false,
+        );
+        return;
+      }
       final response = await businessClient.from("likes").insert({
-        'user_id': user?.id,
+        'user_id': user.id,
         'json_location': listPlaceGenerated.map((e) => e.toJson()).toList(),
         'created_at': DateTime.now().toIso8601String(),
       });
