@@ -166,7 +166,6 @@ class _SearchTextField extends GetView<MapScreenController> {
 class _PlaceCardPanel extends GetView<MapScreenController> {
   @override
   Widget build(BuildContext context) {
-    final authControl = Get.find<AuthController>();
     return Obx(() {
       if (controller.placeGeneratedStatus.value != EPlaceGenerated.GENERATED) {
         return const SizedBox.shrink();
@@ -248,53 +247,56 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
                             ),
                           ],
                         ),
-                        IntrinsicHeight(
-                          child: Row(
-                            children: [
-                              // 🧾 Scrollable Container
-                              Expanded(
-                                child: Container(
-                                  height: Get.height * 0.268,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ScrollConfiguration(
-                                    behavior: ScrollConfiguration.of(context)
-                                        .copyWith(
-                                      dragDevices: {
-                                        PointerDeviceKind.touch,
-                                        PointerDeviceKind.mouse,
-                                      },
-                                      scrollbars: true,
-                                    ),
-                                    child: ListView.builder(
-                                      controller: controller.scrollController,
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount:
-                                          controller.listPlaceGenerated.length,
-                                      itemBuilder: (context, index) {
-                                        return SizedBox(
-                                          width: Get.width * 0.25,
-                                          child: _PlaceCard(
-                                            placeItem: controller
-                                                .listPlaceGenerated[index],
+                        controller.isShowPlaceCard.value
+                            ? Row(
+                                children: [
+                                  // 🧾 Scrollable Container
+                                  Expanded(
+                                    child: Container(
+                                      height: Get.height * 0.268,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.1),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
                                           ),
-                                        );
-                                      },
+                                        ],
+                                      ),
+                                      child: ScrollConfiguration(
+                                        behavior:
+                                            ScrollConfiguration.of(context)
+                                                .copyWith(
+                                          dragDevices: {
+                                            PointerDeviceKind.touch,
+                                            PointerDeviceKind.mouse,
+                                          },
+                                          scrollbars: true,
+                                        ),
+                                        child: ListView.builder(
+                                          controller:
+                                              controller.scrollController,
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: controller
+                                              .listPlaceGenerated.length,
+                                          itemBuilder: (context, index) {
+                                            return SizedBox(
+                                              width: Get.width * 0.25,
+                                              child: _PlaceCard(
+                                                placeItem: controller
+                                                    .listPlaceGenerated[index],
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
                       ],
                     ),
                   );
