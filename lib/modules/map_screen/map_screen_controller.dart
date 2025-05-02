@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:just_audio/just_audio.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,7 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tien_giang_mystic/components/confirm_dialog.dart';
 import 'package:tien_giang_mystic/models/bookmark_place_model.dart';
+import 'package:tien_giang_mystic/models/place_response_model.dart';
 import 'package:tien_giang_mystic/utils/app_logger.dart';
 import 'package:uuid/uuid.dart';
 
@@ -375,19 +377,19 @@ class MapScreenController extends GetxController
           .eq('chat_id', chatID);
 
       if (response.isNotEmpty) {
-        placeGeneratedStatus.value = EPlaceGenerated.GENERATED;
-        Logger().i('Webhook response: $response');
-        isLoading.value = false;
-        final _listDataGenerated = (response as List)
-            .expand((item) => item['list_data'] as List)
-            .map((e) => PlaceModel.fromJson(e))
-            .toList();
+        final placeData = PlaceResponse.fromJson(response.first);
+        if (placeData.listData != null) {
+          placeGeneratedStatus.value = EPlaceGenerated.GENERATED;
+          isLoading.value = false;
 
-        // Save generated places for non-logged in users
-        await saveTemporaryData(generatedPlaces: _listDataGenerated);
+          final _listDataGenerated = placeData.listData ?? [];
 
-        return _listDataGenerated;
+          await saveTemporaryData(generatedPlaces: _listDataGenerated);
+
+          return _listDataGenerated;
+        }
       }
+      return [];
     } catch (e) {
       Logger().e('Error in getDataGenerated: $e');
     }
@@ -597,7 +599,7 @@ class MapScreenController extends GetxController
           break;
 
         case EPlayType.GENERATING:
-          // ignore while loading
+          // Ignore, still loading
           break;
 
         case EPlayType.PLAY:
@@ -632,55 +634,77 @@ class MapScreenController extends GetxController
   //     };
 
   //     final body = jsonEncode({
-  //       "model": "tts-1", // or "tts-1-hd" for higher quality
-  //       "input": text,
-  //       "voice": "coral" // coral
+  //       "model": "tts-1",
+  //       "input": "đoạn check dài hơn gần 300 chữ",
+  //       "voice": "coral"
   //     });
 
   //     final response = await http.post(uri, headers: headers, body: body);
 
   //     if (response.statusCode == 200) {
-  //       // Create a Blob and download/play the audio
   //       final blob = html.Blob([response.bodyBytes], 'audio/mpeg');
   //       final url = html.Url.createObjectUrlFromBlob(blob);
-  //       final audio = html.AudioElement()
+
+  //       _audioPlayer?.pause();
+  //       _audioPlayer?.remove();
+
+  //       _audioPlayer = html.AudioElement()
   //         ..src = url
   //         ..autoplay = true;
-  //       audio.play();
+
+  //       _audioPlayer!.onEnded.listen((event) {
+  //         playType.value = EPlayType.STOP;
+  //       });
+
+  //       await _audioPlayer!.play();
+  //       playType.value = EPlayType.PLAY;
   //     } else {
-  //       print("Failed: ${response.statusCode} - ${response.body}");
+  //       print("TTS Failed: ${response.statusCode} - ${response.body}");
+  //       playType.value = EPlayType.INIT;
   //     }
   //   } catch (e) {
   //     print('TTS Error: $e');
+  //     playType.value = EPlayType.INIT;
   //   }
   // }
 
   Future<void> generateTextToSpeech(String text) async {
+    final String apiKey = Env.elevenLabKey;
+    final String voiceId = 'xPEfmymXC4WdBxGMznS7';
+    final String modelId = 'eleven_turbo_v2_5';
+
+    final Uri url =
+        Uri.parse('https://api.elevenlabs.io/v1/text-to-speech/$voiceId');
+
+    final headers = {
+      'xi-api-key': apiKey,
+      'Content-Type': 'application/json',
+      'Accept': 'audio/mpeg',
+    };
+
+    final body = jsonEncode({
+      'text': "kiểm tra thử tui là người Việt Nam",
+      'model_id': modelId,
+      'voice_settings': {
+        'stability': 0.5,
+        'similarity_boost': 0.75,
+        'speed': 0.9,
+      },
+    });
+
     try {
-      final uri = Uri.parse("https://api.openai.com/v1/audio/speech");
-
-      final headers = {
-        "Authorization": "Bearer $OPEN_AI_API_KEY",
-        "Content-Type": "application/json"
-      };
-
-      final body = jsonEncode({
-        "model": "tts-1",
-        "input": "đoạn check dài hơn gần 300 chữ",
-        "voice": "coral"
-      });
-
-      final response = await http.post(uri, headers: headers, body: body);
+      final response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
         final blob = html.Blob([response.bodyBytes], 'audio/mpeg');
-        final url = html.Url.createObjectUrlFromBlob(blob);
+        final audioUrl = html.Url.createObjectUrlFromBlob(blob);
 
+        // Dispose old player
         _audioPlayer?.pause();
         _audioPlayer?.remove();
 
         _audioPlayer = html.AudioElement()
-          ..src = url
+          ..src = audioUrl
           ..autoplay = true;
 
         _audioPlayer!.onEnded.listen((event) {
@@ -690,11 +714,11 @@ class MapScreenController extends GetxController
         await _audioPlayer!.play();
         playType.value = EPlayType.PLAY;
       } else {
-        print("TTS Failed: ${response.statusCode} - ${response.body}");
+        print('TTS failed: ${response.statusCode} - ${response.body}');
         playType.value = EPlayType.INIT;
       }
     } catch (e) {
-      print('TTS Error: $e');
+      print('TTS generation error: $e');
       playType.value = EPlayType.INIT;
     }
   }

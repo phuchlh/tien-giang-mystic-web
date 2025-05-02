@@ -25,4 +25,6 @@ class Env {
   static const baseURL = String.fromEnvironment('N8N_WEBHOOK_BASE_URL');
 
   static const String serperKey = String.fromEnvironment('SERPER_KEY');
+  static const String elevenLabKey =
+      String.fromEnvironment('ELEVEN_LAB_API_KEY');
 }
