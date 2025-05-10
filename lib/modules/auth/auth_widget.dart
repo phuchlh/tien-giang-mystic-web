@@ -2,10 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 
 import '../../utils/gap.dart';
 import '../../utils/images.dart';
 import 'auth_controller.dart';
+
+import 'package:iconify_flutter/icons/tabler.dart';
+
+import 'package:iconify_flutter/icons/gis.dart';
+import 'package:iconify_flutter/icons/simple_line_icons.dart';
 
 class AuthWidget extends GetView<AuthController> {
   const AuthWidget({super.key});
@@ -13,37 +19,167 @@ class AuthWidget extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: 16,
-      left: 16,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+      top: 0,
+      left: 0,
+      child: Obx(() {
+        final isExpanded = controller.isDrawerExpanded.value;
+        final isLogin = controller.isAuthenticated;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: isExpanded ? k200 : k60,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              bottomRight: Radius.circular(12),
             ),
-            child: Obx(() {
-              if (controller.isLoading) {
-                return const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                );
-              }
-              return Row(
-                children: [
-                  GreetingWidget(isLogin: controller.isAuthenticated),
-                ],
-              );
-            }),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+              ),
+            ],
           ),
-          Gap(k8),
-          AuthButton(),
-        ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: k10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    isExpanded ? Icons.close : Icons.menu,
+                    size: k24,
+                  ),
+                  onPressed: controller.toggleDrawer,
+                  tooltip: isExpanded ? 'Đóng' : 'Mở',
+                ),
+                Gap(k10),
+                _CircleImageWidget(),
+                Gap(k20),
+                ...(!isLogin
+                    ? [
+                        _DrawerItem(
+                          icon: SimpleLineIcons.login,
+                          label: 'Đăng nhập',
+                          labelExpanded: 'Đăng nhập',
+                          isExpanded: isExpanded,
+                          onTap: controller.signInWithGoogle,
+                        ),
+                      ]
+                    : [
+                        _DrawerItem(
+                          icon: Gis.bookmark_poi,
+                          label: 'Địa điểm',
+                          labelExpanded: 'Địa điểm đã lưu',
+                          isExpanded: isExpanded,
+                          onTap: () {
+                            print("Địa điểm");
+                          },
+                        ),
+                        Gap(k20),
+                        _DrawerItem(
+                          icon: Gis.route,
+                          label: 'Chuyến đi',
+                          labelExpanded: 'Chuyến đi đã lưu',
+                          isExpanded: isExpanded,
+                          onTap: () {
+                            print("Địa điểm");
+                          },
+                        ),
+                      ]),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _DrawerItem extends GetView<AuthController> {
+  final String icon;
+  final String label;
+  final String labelExpanded;
+  final bool isExpanded;
+  final VoidCallback onTap;
+
+  const _DrawerItem({
+    required this.icon,
+    required this.label,
+    this.isExpanded = false,
+    this.labelExpanded = "",
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: isExpanded
+            ? Row(
+                children: [
+                  Iconify(
+                    icon,
+                    color: null,
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    isExpanded ? labelExpanded : label,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Iconify(
+                    icon,
+                    color: Theme.of(context).iconTheme.color,
+                  ),
+                  Gap(k8),
+                  Text(
+                    isExpanded ? labelExpanded : label,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
       ),
     );
+  }
+}
+
+class _CircleImageWidget extends GetView<AuthController> {
+  const _CircleImageWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      return controller.isAuthenticated
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: controller.user.value?.picture ?? "",
+                width: k32,
+                height: k32,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => CircularProgressIndicator(),
+                errorWidget: (context, url, error) => FirstNameAvatar(
+                    firstName: controller.user.value?.fullName ?? ""),
+              ),
+            )
+          : Image.asset(
+              Images.tgicon,
+              width: k32,
+              height: k32,
+            );
+    });
   }
 }
 

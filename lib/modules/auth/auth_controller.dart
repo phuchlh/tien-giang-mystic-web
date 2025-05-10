@@ -18,6 +18,8 @@ class AuthController extends GetxController {
 
   bool get isAuthenticated => _isAuthenticated.value;
   bool get isLoading => _isLoading.value;
+
+  var isDrawerExpanded = false.obs;
   final Rxn<UserMetaModel> user = Rxn<UserMetaModel>();
 
   @override
@@ -37,6 +39,10 @@ class AuthController extends GetxController {
         onCheckSession();
       }
     });
+  }
+
+  void toggleDrawer() {
+    isDrawerExpanded.value = !isDrawerExpanded.value;
   }
 
   void onCheckSession() async {
