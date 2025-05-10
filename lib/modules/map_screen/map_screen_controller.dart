@@ -1,4 +1,4 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers, constant_identifier_names
+// ignore_for_file: no_leading_underscores_for_local_identifiers, constant_identifier_names, unrelated_type_equality_checks
 
 import 'dart:async';
 import 'dart:convert';
@@ -17,6 +17,7 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tien_giang_mystic/components/confirm_dialog.dart';
 import 'package:tien_giang_mystic/models/bookmark_place_model.dart';
+import 'package:tien_giang_mystic/models/label_model.dart';
 import 'package:tien_giang_mystic/models/place_response_model.dart';
 import 'package:tien_giang_mystic/utils/app_logger.dart';
 import 'package:uuid/uuid.dart';
@@ -67,6 +68,8 @@ class MapScreenController extends GetxController
   final RxBool isShowPlaceCard = true.obs;
   final RxBool isShowDescription = true.obs;
   final Rx<EPlayType> playType = EPlayType.INIT.obs;
+  final RxList<LabelModel> labels = <LabelModel>[].obs;
+  final Rx<LabelModel> selectedLabel = LabelModel().obs;
 
   final TextEditingController promptController = TextEditingController();
   final RxList<String> suggestions = <String>[].obs;
@@ -110,6 +113,8 @@ class MapScreenController extends GetxController
   void onInit() {
     super.onInit();
     _loadLocationData();
+    _initLabelStream();
+    getLabel();
     slidingStatus = SlidingStatus.hide.obs;
     tabController = TabController(length: 3, vsync: this);
     dataLoadingStatus = DataLoadingStatus.pending.obs;
@@ -133,6 +138,65 @@ class MapScreenController extends GetxController
     tabController.dispose();
     promptController.dispose();
     searchController.dispose();
+  }
+
+  Future<void> getLabel() async {
+    try {
+      final response = await aiClient.from('labels').select('*');
+
+      if (response.isNotEmpty) {
+        labels.assignAll(response.map((e) => LabelModel.fromJson(e)).toList());
+      } else {
+        labels.clear();
+      }
+
+      if (response.isNotEmpty) {
+        labels.assignAll(response.map((e) => LabelModel.fromJson(e)).toList());
+      } else {
+        labels.clear();
+      }
+    } catch (e) {
+      AppLogger.error('Error fetching labels: $e');
+    }
+  }
+
+  void _initLabelStream() {
+    aiClient
+        .channel('public:labels')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'labels',
+          callback: (payload) {
+            final eventType = payload.eventType;
+            final record = payload.newRecord;
+
+            switch (eventType) {
+              case PostgresChangeEvent.insert:
+                labels.add(LabelModel.fromJson(record));
+                break;
+              case PostgresChangeEvent.update:
+                final updated = LabelModel.fromJson(record);
+                if (updated.isActive == true) {
+                  labels.add(updated);
+                } else {
+                  labels.removeWhere((label) => label.id == updated.id);
+                }
+                break;
+              case PostgresChangeEvent.delete:
+                final deletedId = payload.oldRecord['id'];
+                labels.removeWhere((label) => label.id == deletedId);
+                break;
+              default:
+                break;
+            }
+          },
+        )
+        .subscribe();
+  }
+
+  void onSelectLabel(LabelModel label) {
+    selectedLabel.value = label;
   }
 
   Future<void> getBookmarkPlace() async {
@@ -624,50 +688,6 @@ class MapScreenController extends GetxController
     }
   }
 
-  // Future<void> generateTextToSpeech(String text) async {
-  //   try {
-  //     final uri = Uri.parse("https://api.openai.com/v1/audio/speech");
-
-  //     final headers = {
-  //       "Authorization": "Bearer $OPEN_AI_API_KEY",
-  //       "Content-Type": "application/json"
-  //     };
-
-  //     final body = jsonEncode({
-  //       "model": "tts-1",
-  //       "input": "đoạn check dài hơn gần 300 chữ",
-  //       "voice": "coral"
-  //     });
-
-  //     final response = await http.post(uri, headers: headers, body: body);
-
-  //     if (response.statusCode == 200) {
-  //       final blob = html.Blob([response.bodyBytes], 'audio/mpeg');
-  //       final url = html.Url.createObjectUrlFromBlob(blob);
-
-  //       _audioPlayer?.pause();
-  //       _audioPlayer?.remove();
-
-  //       _audioPlayer = html.AudioElement()
-  //         ..src = url
-  //         ..autoplay = true;
-
-  //       _audioPlayer!.onEnded.listen((event) {
-  //         playType.value = EPlayType.STOP;
-  //       });
-
-  //       await _audioPlayer!.play();
-  //       playType.value = EPlayType.PLAY;
-  //     } else {
-  //       print("TTS Failed: ${response.statusCode} - ${response.body}");
-  //       playType.value = EPlayType.INIT;
-  //     }
-  //   } catch (e) {
-  //     print('TTS Error: $e');
-  //     playType.value = EPlayType.INIT;
-  //   }
-  // }
-
   Future<void> generateTextToSpeech(String text) async {
     final String apiKey = Env.elevenLabKey;
     final String voiceId = 'xPEfmymXC4WdBxGMznS7';
@@ -683,7 +703,7 @@ class MapScreenController extends GetxController
     };
 
     final body = jsonEncode({
-      'text': "kiểm tra thử tui là người Việt Nam",
+      'text': text,
       'model_id': modelId,
       'voice_settings': {
         'stability': 0.5,
@@ -836,5 +856,7 @@ class MapScreenController extends GetxController
     isProcessing.value = false;
     chatID.value = '';
     promptController.clear();
+    // clear local tour
+    clearTemporaryData();
   }
 }

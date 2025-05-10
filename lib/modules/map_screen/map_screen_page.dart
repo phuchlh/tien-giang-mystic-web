@@ -10,6 +10,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/ph.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart' as lottie;
+import 'package:tien_giang_mystic/utils/app_logger.dart';
 
 import '../../components/confirm_dialog.dart';
 import '../../models/place_model.dart';
@@ -70,6 +71,7 @@ class MapScreenPage extends GetView<MapScreenController> {
                 _SearchTextField(),
                 _PlaceCardPanel(),
                 _InfoPlacePanel(),
+                _ChipLabel(),
                 Obx(() {
                   if (controller.isProcessing.value) {
                     // show loading with lottie and black background
@@ -93,6 +95,57 @@ class MapScreenPage extends GetView<MapScreenController> {
         );
       },
     );
+  }
+}
+
+class _ChipLabel extends GetView<MapScreenController> {
+  const _ChipLabel({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final labels = controller.labels;
+
+      final isSelected = controller.selectedLabel.value;
+
+      if (labels.isEmpty) {
+        return const Text('No labels available');
+      }
+
+      return Positioned(
+        top: 20,
+        left: 0,
+        right: 0,
+        child: Align(
+          alignment: Alignment.center,
+          child: Wrap(
+            spacing: 8.0,
+            children: labels.map((label) {
+              if (label.isActive == false) {
+                return const SizedBox.shrink();
+              }
+
+              return ActionChip(
+                onPressed: () => controller.onSelectLabel(label),
+                label: Text(label.labelName ?? ""),
+                backgroundColor: isSelected.id == label.id
+                    ? context.theme.primaryColor.withAlpha(100).withBlue(250)
+                    : context.theme.cardColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: isSelected.id == label.id
+                        ? Colors.transparent
+                        : Colors.grey,
+                    width: 0.2,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      );
+    });
   }
 }
 
