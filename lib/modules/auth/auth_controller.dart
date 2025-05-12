@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:iconify_flutter/icons/material_symbols.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tien_giang_mystic/modules/map_screen/map_screen_controller.dart';
+import 'package:tien_giang_mystic/utils/enum.dart';
 
+import '../../models/drawer_model.dart';
 import '../../models/user_metadata_model.dart';
 import '../../service/session_service.dart';
 import '../../service/supabase_service.dart';
 import '../../service/web_storage.dart';
 import '../../utils/app_logger.dart';
+import '../map_screen/map_screen_controller.dart';
 
 class AuthController extends GetxController {
   final _isAuthenticated = false.obs;
@@ -22,14 +25,47 @@ class AuthController extends GetxController {
   var isDrawerExpanded = false.obs;
   final Rxn<UserMetaModel> user = Rxn<UserMetaModel>();
 
+  late List<DrawerModel> drawerItems;
+  // final RxString selectedDrawerItem = ''.obs;
+  final Rx<EDrawerTypeButton> selectedDrawerItem = EDrawerTypeButton.HOLD.obs;
+  final Rx<DrawerModel> selectedDrawerItemModel = DrawerModel(
+    typeButton: EDrawerTypeButton.HOLD,
+    title: '',
+    icon: '',
+    isExpanded: false,
+    onTap: () {},
+  ).obs;
+
   @override
   void onInit() {
     super.onInit();
     // onCheckSession();
+    drawerItems = [
+      DrawerModel(
+        typeButton: EDrawerTypeButton.PLACE,
+        title: 'Địa điểm',
+        icon: MaterialSymbols.location_on_outline_rounded,
+        isExpanded: isDrawerExpanded.value,
+        onTap: () {},
+      ),
+      DrawerModel(
+        typeButton: EDrawerTypeButton.HOLD,
+        title: '',
+        icon: "",
+        isExpanded: isDrawerExpanded.value,
+        onTap: () {},
+      ),
+      DrawerModel(
+        typeButton: EDrawerTypeButton.TOUR,
+        title: 'Chuyến đi',
+        icon: MaterialSymbols.route_outline,
+        isExpanded: isDrawerExpanded.value,
+        onTap: () {},
+      ),
+    ];
     businessClient.auth.onAuthStateChange.listen((data) {
       final event = data.event;
 
-      AppLogger.debug('User signed in: $data');
       if (event == AuthChangeEvent.signedIn) {
         onCheckSession();
       } else if (event == AuthChangeEvent.signedOut) {
@@ -45,11 +81,26 @@ class AuthController extends GetxController {
     isDrawerExpanded.value = !isDrawerExpanded.value;
   }
 
+  void onDrawerItemTap(EDrawerTypeButton type) {
+    if (type == EDrawerTypeButton.HOLD) return;
+
+    selectedDrawerItem.value =
+        (selectedDrawerItem.value == type) ? EDrawerTypeButton.HOLD : type;
+    selectedDrawerItemModel.value =
+        drawerItems.firstWhere((item) => item.typeButton == type,
+            orElse: () => DrawerModel(
+                  typeButton: EDrawerTypeButton.HOLD,
+                  title: '',
+                  icon: '',
+                  isExpanded: false,
+                  onTap: () {},
+                ));
+  }
+
   void onCheckSession() async {
     final session = Supabase.instance.client.auth.currentSession;
     if (session != null) {
       user.value = UserMetaModel.fromMap(session.user.userMetadata ?? {});
-
       _isAuthenticated.value = true;
       await WebStorage.write("sessionToken", session.accessToken);
       await WebStorage.write("refreshToken", session.refreshToken ?? "");

@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:just_audio/just_audio.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -70,6 +69,7 @@ class MapScreenController extends GetxController
   final Rx<EPlayType> playType = EPlayType.INIT.obs;
   final RxList<LabelModel> labels = <LabelModel>[].obs;
   final Rx<LabelModel> selectedLabel = LabelModel().obs;
+  final List<PlaceModel> listDetailPlaceBookmark = <PlaceModel>[].obs;
 
   final TextEditingController promptController = TextEditingController();
   final RxList<String> suggestions = <String>[].obs;
@@ -858,5 +858,37 @@ class MapScreenController extends GetxController
     promptController.clear();
     // clear local tour
     clearTemporaryData();
+  }
+
+  Future<void> onGetBookmarkPlace() async {
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) {
+        AppLogger.error('User not logged in');
+        return;
+      }
+      final listPlace = await businessClient
+          .from('saved_locations')
+          .select('created_at, locations (*)')
+          .eq('user_id', user.id ?? "");
+
+      if (listPlace.isNotEmpty) {
+        print("List place: $listPlace");
+        listDetailPlaceBookmark.assignAll(
+            listPlace.map((e) => PlaceModel.fromJson(e['locations'])).toList());
+      } else if (listPlace.isEmpty) {
+        print("No bookmark place found");
+      }
+    } catch (e) {
+      AppLogger.error('Error fetching bookmark place: $e');
+    }
+  }
+
+  Future<void> onGetBookmarkTour() async {
+    try {
+      //
+    } catch (e) {
+      AppLogger.error('Error fetching bookmark tour: $e');
+    }
   }
 }

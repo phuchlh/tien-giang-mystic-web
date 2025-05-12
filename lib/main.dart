@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:tien_giang_mystic/modules/map_screen/map_screen_controller.dart';
 
 import 'main_binding.dart';
 import 'modules/map_screen/map_screen_page.dart';

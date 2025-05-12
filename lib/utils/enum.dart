@@ -49,3 +49,5 @@ enum EButtonClickType {
 }
 
 enum EPlayType { INIT, GENERATING, PLAY, PAUSE, STOP }
+
+enum EDrawerTypeButton { HOLD, PLACE, TOUR }

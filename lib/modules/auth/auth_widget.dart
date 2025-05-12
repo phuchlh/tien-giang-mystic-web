@@ -3,15 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/simple_line_icons.dart';
+import 'package:tien_giang_mystic/utils/enum.dart';
 
 import '../../utils/gap.dart';
 import '../../utils/images.dart';
+import '../map_screen/map_screen_controller.dart';
 import 'auth_controller.dart';
-
-import 'package:iconify_flutter/icons/tabler.dart';
-
-import 'package:iconify_flutter/icons/gis.dart';
-import 'package:iconify_flutter/icons/simple_line_icons.dart';
 
 class AuthWidget extends GetView<AuthController> {
   const AuthWidget({super.key});
@@ -26,7 +24,7 @@ class AuthWidget extends GetView<AuthController> {
         final isLogin = controller.isAuthenticated;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          width: isExpanded ? k200 : k60,
+          width: isExpanded ? k180 : k80,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: const BorderRadius.only(
@@ -42,7 +40,7 @@ class AuthWidget extends GetView<AuthController> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: k10),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              // crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 IconButton(
                   icon: Icon(
@@ -54,38 +52,53 @@ class AuthWidget extends GetView<AuthController> {
                 ),
                 Gap(k10),
                 _CircleImageWidget(),
-                Gap(k20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: k8),
+                  child: Divider(
+                    color: Colors.grey.shade300,
+                    height: 1,
+                  ),
+                ),
+                // Gap(k20),
                 ...(!isLogin
                     ? [
                         _DrawerItem(
                           icon: SimpleLineIcons.login,
                           label: 'Đăng nhập',
-                          labelExpanded: 'Đăng nhập',
                           isExpanded: isExpanded,
                           onTap: controller.signInWithGoogle,
                         ),
                       ]
-                    : [
-                        _DrawerItem(
-                          icon: Gis.bookmark_poi,
-                          label: 'Địa điểm',
-                          labelExpanded: 'Địa điểm đã lưu',
-                          isExpanded: isExpanded,
-                          onTap: () {
-                            print("Địa điểm");
-                          },
-                        ),
-                        Gap(k20),
-                        _DrawerItem(
-                          icon: Gis.route,
-                          label: 'Chuyến đi',
-                          labelExpanded: 'Chuyến đi đã lưu',
-                          isExpanded: isExpanded,
-                          onTap: () {
-                            print("Địa điểm");
-                          },
-                        ),
-                      ]),
+                    : controller.drawerItems
+                        .map((item) => item.typeButton == EDrawerTypeButton.HOLD
+                            ? Gap(k20)
+                            : _DrawerItem(
+                                icon: item.icon,
+                                label: item.title,
+                                isExpanded: isExpanded,
+                                isSelected:
+                                    controller.selectedDrawerItem.value ==
+                                        item.typeButton,
+                                onTap: () {
+                                  controller.onDrawerItemTap(item.typeButton);
+                                  Future.microtask(() {
+                                    final mapController =
+                                        Get.find<MapScreenController>();
+                                    switch (
+                                        controller.selectedDrawerItem.value) {
+                                      case EDrawerTypeButton.HOLD:
+                                        break;
+                                      case EDrawerTypeButton.PLACE:
+                                        mapController.onGetBookmarkPlace();
+                                        break;
+                                      case EDrawerTypeButton.TOUR:
+                                        mapController.onGetBookmarkTour();
+                                        break;
+                                    }
+                                  });
+                                },
+                              ))
+                        .toList()),
               ],
             ),
           ),
@@ -98,16 +111,16 @@ class AuthWidget extends GetView<AuthController> {
 class _DrawerItem extends GetView<AuthController> {
   final String icon;
   final String label;
-  final String labelExpanded;
   final bool isExpanded;
   final VoidCallback onTap;
+  final bool isSelected;
 
   const _DrawerItem({
     required this.icon,
     required this.label,
     this.isExpanded = false,
-    this.labelExpanded = "",
     required this.onTap,
+    this.isSelected = false,
   });
 
   @override
@@ -118,18 +131,24 @@ class _DrawerItem extends GetView<AuthController> {
         onTap: onTap,
         child: isExpanded
             ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Iconify(
                     icon,
-                    color: null,
+                    color: isSelected
+                        ? context.theme.colorScheme.primary
+                        : Colors.black87,
                   ),
                   const SizedBox(width: 16),
                   Text(
-                    isExpanded ? labelExpanded : label,
+                    label,
                     style: context.textTheme.bodyMedium?.copyWith(
                       fontSize: 14,
-                      color: Colors.black87,
+                      color: isSelected
+                          ? context.theme.colorScheme.primary
+                          : Colors.black87,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               )
@@ -138,16 +157,21 @@ class _DrawerItem extends GetView<AuthController> {
                 children: [
                   Iconify(
                     icon,
-                    color: Theme.of(context).iconTheme.color,
+                    color: isSelected
+                        ? context.theme.colorScheme.primary
+                        : Colors.black87,
                   ),
                   Gap(k8),
                   Text(
-                    isExpanded ? labelExpanded : label,
+                    label,
                     style: context.textTheme.bodyMedium?.copyWith(
                       fontSize: 14,
-                      color: Colors.black87,
+                      color: isSelected
+                          ? context.theme.colorScheme.primary
+                          : Colors.black87,
                     ),
                     textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

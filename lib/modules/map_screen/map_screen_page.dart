@@ -3,15 +3,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/ph.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart' as lottie;
-import 'package:tien_giang_mystic/utils/app_logger.dart';
 
+import '../../components/chip_widget.dart';
 import '../../components/confirm_dialog.dart';
 import '../../models/place_model.dart';
 import '../../utils/constant.dart';
@@ -21,10 +20,8 @@ import '../../utils/images.dart';
 import '../auth/auth_controller.dart';
 import '../auth/auth_widget.dart';
 import 'map_screen_controller.dart';
+import 'widgets/drawer_content_widget.dart';
 import 'widgets/panel_information.dart';
-import '../../components/chip_widget.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/ph.dart';
 
 class MapScreenPage extends GetView<MapScreenController> {
   const MapScreenPage({super.key});
@@ -73,8 +70,20 @@ class MapScreenPage extends GetView<MapScreenController> {
                 _InfoPlacePanel(),
                 _ChipLabel(),
                 Obx(() {
+                  final authController = Get.find<AuthController>();
+                  final isClicked = authController.selectedDrawerItem.value;
+
+                  return isClicked == EDrawerTypeButton.HOLD
+                      ? const SizedBox.shrink()
+                      : DrawerContentWidget(
+                          title: authController
+                              .selectedDrawerItemModel.value.title,
+                          typeDisplay: authController
+                              .selectedDrawerItemModel.value.typeButton,
+                        );
+                }),
+                Obx(() {
                   if (controller.isProcessing.value) {
-                    // show loading with lottie and black background
                     return Container(
                       color: Colors.black.withOpacity(0.5),
                       child: Center(
