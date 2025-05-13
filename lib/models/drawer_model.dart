@@ -6,13 +6,11 @@ class DrawerModel {
   String title;
   String icon;
   bool isExpanded;
-  VoidCallback onTap;
 
   DrawerModel({
     required this.typeButton,
     required this.title,
     required this.icon,
     required this.isExpanded,
-    required this.onTap,
   });
 }

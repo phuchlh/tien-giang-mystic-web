@@ -94,6 +94,9 @@ class AuthWidget extends GetView<AuthController> {
                                       case EDrawerTypeButton.TOUR:
                                         mapController.onGetBookmarkTour();
                                         break;
+                                      case EDrawerTypeButton.LOGOUT:
+                                        controller.signOut();
+                                        break;
                                     }
                                   });
                                 },

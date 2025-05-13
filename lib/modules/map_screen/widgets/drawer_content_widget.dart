@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/material_symbols.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:tien_giang_mystic/models/place_model.dart';
+import 'package:tien_giang_mystic/modules/map_screen/widgets/dialog_detail.dart';
+import 'package:tien_giang_mystic/utils/constant.dart';
 import 'package:tien_giang_mystic/utils/enum.dart';
 
 import '../../../utils/gap.dart';
@@ -26,7 +31,7 @@ class DrawerContentWidget extends GetView<MapScreenController> {
         left: isExpanded ? k200 : k100,
         child: Container(
             decoration: BoxDecoration(
-              color: context.theme.cardColor,
+              color: Color(0xFFf1f3f5),
               borderRadius: BorderRadius.all(Radius.circular(12)),
             ),
             width: Get.width * 0.25,
@@ -50,6 +55,8 @@ class DrawerContentWidget extends GetView<MapScreenController> {
         return _PlaceBookmarkWidget(title: title);
       case EDrawerTypeButton.TOUR:
         return _TourBookmarkWidget(title: title);
+      default:
+        return const SizedBox.shrink();
     }
   }
 }
@@ -71,6 +78,7 @@ class _TitleWidget extends GetView<MapScreenController> {
 
 class _PlaceBookmarkWidget extends GetView<MapScreenController> {
   final String title;
+
   const _PlaceBookmarkWidget({super.key, required this.title});
 
   @override
@@ -103,63 +111,72 @@ class _PlaceBookmarkItem extends GetView<MapScreenController> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              place.placeName ?? '',
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () {
+        controller.animatedMapMove(
+          LatLng(
+            place.latitude ?? Constant.TIEN_GIANG_LATITUDE,
+            place.longitude ?? Constant.TIEN_GIANG_LONGITUDE,
+          ),
+          16.0,
+        );
+        controller.loadSpecificLocationData(place);
+        showDialog(
+          context: context,
+          builder: (context) => DialogDetail(),
+        );
+      },
+      child: Card(
+        color: Colors.white,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: 0,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                place.placeName ?? '',
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    place.address ?? '',
-                    style: context.textTheme.bodySmall,
-                  ),
+              const SizedBox(height: 4),
+              _RowText(
+                icon: Iconify(
+                  MaterialSymbols.location_on_outline_rounded,
+                  color: context.theme.colorScheme.primary,
+                  size: k24,
                 ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  place.openCloseHour ?? '',
-                  style: context.textTheme.bodySmall,
+                content: place.address ?? '',
+              ),
+              const SizedBox(height: 6),
+              _RowText(
+                icon: Iconify(
+                  MaterialSymbols.timer_outline_rounded,
+                  color: context.theme.colorScheme.onSurface.withOpacity(0.6),
+                  size: k24,
                 ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(Icons.confirmation_number,
-                    size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  place.ticket ?? '',
-                  style: context.textTheme.bodySmall,
+                content: place.openCloseHour ?? '',
+              ),
+              const SizedBox(height: 6),
+              _RowText(
+                icon: Iconify(
+                  MaterialSymbols.local_activity_outline_rounded,
+                  color: context.theme.colorScheme.onSurface.withOpacity(0.6),
+                  size: k24,
                 ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              place.visitTime ?? '',
-              style:
-                  context.textTheme.bodySmall?.copyWith(color: Colors.black54),
-            ),
-          ],
+                content: place.ticket ?? '',
+              ),
+              const SizedBox(height: 6),
+              Text(
+                place.visitTime ?? '',
+                style: context.textTheme.bodySmall
+                    ?.copyWith(color: Colors.black54),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -181,6 +198,34 @@ class _TourBookmarkWidget extends GetView<MapScreenController> {
         Text("123123123123213123123"),
         Text("123123123123213123123"),
         Text("123123123123213123123"),
+      ],
+    );
+  }
+}
+
+class _RowText extends StatelessWidget {
+  final Widget icon;
+  final String content;
+  const _RowText({
+    super.key,
+    required this.icon,
+    required this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        icon,
+        Gap(k8),
+        Expanded(
+          child: Text(
+            content,
+            maxLines: 2,
+            style:
+                context.textTheme.bodyMedium?.copyWith(color: Colors.black54),
+          ),
+        ),
       ],
     );
   }

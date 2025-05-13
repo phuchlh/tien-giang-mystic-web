@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:iconify_flutter/icons/material_symbols.dart';
+import 'package:iconify_flutter/icons/simple_line_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tien_giang_mystic/utils/enum.dart';
 
 import '../../models/drawer_model.dart';
 import '../../models/user_metadata_model.dart';
@@ -10,7 +10,7 @@ import '../../service/session_service.dart';
 import '../../service/supabase_service.dart';
 import '../../service/web_storage.dart';
 import '../../utils/app_logger.dart';
-import '../map_screen/map_screen_controller.dart';
+import '../../utils/enum.dart';
 
 class AuthController extends GetxController {
   final _isAuthenticated = false.obs;
@@ -33,7 +33,6 @@ class AuthController extends GetxController {
     title: '',
     icon: '',
     isExpanded: false,
-    onTap: () {},
   ).obs;
 
   @override
@@ -46,21 +45,30 @@ class AuthController extends GetxController {
         title: 'Địa điểm',
         icon: MaterialSymbols.location_on_outline_rounded,
         isExpanded: isDrawerExpanded.value,
-        onTap: () {},
       ),
       DrawerModel(
         typeButton: EDrawerTypeButton.HOLD,
         title: '',
         icon: "",
         isExpanded: isDrawerExpanded.value,
-        onTap: () {},
       ),
       DrawerModel(
         typeButton: EDrawerTypeButton.TOUR,
         title: 'Chuyến đi',
         icon: MaterialSymbols.route_outline,
         isExpanded: isDrawerExpanded.value,
-        onTap: () {},
+      ),
+      DrawerModel(
+        typeButton: EDrawerTypeButton.HOLD,
+        title: '',
+        icon: "",
+        isExpanded: isDrawerExpanded.value,
+      ),
+      DrawerModel(
+        typeButton: EDrawerTypeButton.LOGOUT,
+        title: 'Đăng xuất',
+        icon: SimpleLineIcons.logout,
+        isExpanded: isDrawerExpanded.value,
       ),
     ];
     businessClient.auth.onAuthStateChange.listen((data) {
@@ -93,7 +101,6 @@ class AuthController extends GetxController {
                   title: '',
                   icon: '',
                   isExpanded: false,
-                  onTap: () {},
                 ));
   }
 

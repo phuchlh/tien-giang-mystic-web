@@ -143,6 +143,7 @@ class _RowText extends StatelessWidget {
         Gap(k8),
         Text(
           content,
+          maxLines: 2,
           style: context.textTheme.bodyLarge?.copyWith(
             color: Colors.grey.shade600,
           ),

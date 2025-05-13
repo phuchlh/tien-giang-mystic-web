@@ -9,6 +9,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/ph.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart' as lottie;
+import 'package:tien_giang_mystic/modules/map_screen/widgets/dialog_detail.dart';
 
 import '../../components/chip_widget.dart';
 import '../../components/confirm_dialog.dart';
@@ -493,45 +494,6 @@ class _ButtonSlide extends GetView<MapScreenController> {
   }
 }
 
-class _DialogDetail extends GetView<MapScreenController> {
-  @override
-  Widget build(Object context) {
-    return GetBuilder<MapScreenController>(
-      builder: (controller) {
-        return Obx(() {
-          if (controller.dataLoadingStatus.value == DataLoadingStatus.loading) {
-            return Center(
-              child: lottie.Lottie.asset(
-                Images.loading,
-                width: k50 * 4.5,
-                height: k50 * 4.5,
-              ),
-            );
-          }
-
-          if (controller.dataLoadingStatus.value == DataLoadingStatus.error) {
-            return const Center(
-              child: Text("Error"),
-            );
-          }
-
-          final scrollController = ScrollController();
-
-          return Dialog(
-            child: SizedBox(
-              height: Get.height * 0.7,
-              width: Get.height * 0.7,
-              child: PanelInformation(
-                scrollController: scrollController,
-              ),
-            ),
-          );
-        });
-      },
-    );
-  }
-}
-
 class _PlaceCard extends GetView<MapScreenController> {
   final PlaceModel placeItem;
   const _PlaceCard({required this.placeItem});
@@ -655,7 +617,7 @@ class _MarkerPlace extends GetView<MapScreenController> {
                   controller.loadSpecificLocationData(e);
                   showDialog(
                     context: context,
-                    builder: (context) => _DialogDetail(),
+                    builder: (context) => DialogDetail(),
                   );
                 },
                 child: const Icon(
