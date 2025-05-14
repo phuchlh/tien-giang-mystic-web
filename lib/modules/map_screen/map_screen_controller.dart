@@ -16,6 +16,7 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tien_giang_mystic/components/confirm_dialog.dart';
 import 'package:tien_giang_mystic/models/bookmark_place_model.dart';
+import 'package:tien_giang_mystic/models/bookmark_tour_model.dart';
 import 'package:tien_giang_mystic/models/label_model.dart';
 import 'package:tien_giang_mystic/models/place_response_model.dart';
 import 'package:tien_giang_mystic/utils/app_logger.dart';
@@ -70,6 +71,7 @@ class MapScreenController extends GetxController
   final RxList<LabelModel> labels = <LabelModel>[].obs;
   final Rx<LabelModel> selectedLabel = LabelModel().obs;
   final List<PlaceModel> listDetailPlaceBookmark = <PlaceModel>[].obs;
+  final List<BookmarkTourModel> listTourBookmark = <BookmarkTourModel>[].obs;
 
   final TextEditingController promptController = TextEditingController();
   final RxList<String> suggestions = <String>[].obs;
@@ -870,7 +872,7 @@ class MapScreenController extends GetxController
       final listPlace = await businessClient
           .from('saved_locations')
           .select('created_at, locations (*)')
-          .eq('user_id', user.id ?? "");
+          .eq('user_id', user.id);
 
       if (listPlace.isNotEmpty) {
         print("List place: $listPlace");
@@ -886,9 +888,28 @@ class MapScreenController extends GetxController
 
   Future<void> onGetBookmarkTour() async {
     try {
-      //
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) {
+        AppLogger.error('User not logged in');
+        return;
+      }
+      final listTour = await businessClient
+          .from('likes')
+          .select('json_location')
+          .eq('user_id', user.id);
+
+      if (listTour.isNotEmpty) {
+        listTourBookmark.assignAll(
+            listTour.map((e) => BookmarkTourModel.fromJson(e)).toList());
+      } else if (listPlace.isEmpty) {
+        print("No bookmark place found");
+      }
     } catch (e) {
       AppLogger.error('Error fetching bookmark tour: $e');
     }
+  }
+
+  String joinPlaceName(List<PlaceModel> places) {
+    return places.map((place) => place.placeName).join(' - ');
   }
 }
