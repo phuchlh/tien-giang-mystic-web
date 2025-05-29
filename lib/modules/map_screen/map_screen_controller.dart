@@ -55,6 +55,7 @@ class MapScreenController extends GetxController
 
   // observables
   final List<PlaceModel> listPlace = <PlaceModel>[].obs;
+  final List<PlaceModel> listFilter = <PlaceModel>[].obs;
   final RxList<BookmarkPlace> listPlaceBookmarked = <BookmarkPlace>[].obs;
   final Rx<PlaceModel> placeDetail = PlaceModel().obs;
   late Rx<SlidingStatus> slidingStatus;
@@ -64,7 +65,8 @@ class MapScreenController extends GetxController
   List<News> listSearch = <News>[].obs;
   Rx<bool> isShowTextfield = false.obs;
   List<PlaceModel> listPlaceGenerated = <PlaceModel>[].obs;
-  final Rx<EPlaceGenerated> placeGeneratedStatus = EPlaceGenerated.HOLD.obs;
+  final Rx<EPlaceGeneratedStatus> placeGeneratedStatus =
+      EPlaceGeneratedStatus.HOLD.obs;
   final RxBool isShowPlaceCard = true.obs;
   final RxBool isShowDescription = true.obs;
   final Rx<EPlayType> playType = EPlayType.INIT.obs;
@@ -203,10 +205,25 @@ class MapScreenController extends GetxController
 
   void onSelectLabel(LabelModel label) {
     if (label.id == selectedLabel.value.id) {
-      selectedLabel.value = LabelModel(); // Deselect if already selected
+      placeGeneratedStatus.value = EPlaceGeneratedStatus.HOLD;
+      selectedLabel.value = LabelModel();
       return;
+    } else {
+      placeGeneratedStatus.value = EPlaceGeneratedStatus.FILTERED;
+
+      final labelText = (label.labelName ?? "").toLowerCase();
+      final filteredList = listPlace.where((place) {
+        final placeLabel = place.placeLabel ?? "";
+        final splitLabels = onSplitPlaceLabel(placeLabel);
+
+        return splitLabels.any(
+          (item) => item.toLowerCase().contains(labelText),
+        );
+      }).toList();
+
+      listFilter.assignAll(filteredList);
+      selectedLabel.value = label;
     }
-    selectedLabel.value = label;
   }
 
   Future<void> getBookmarkPlace() async {
@@ -294,10 +311,8 @@ class MapScreenController extends GetxController
       : panelController.open();
 
   Future<void> _loadLocationData() async {
-    print("url 0100 ${Env.aiURL}");
-    final List locationData = await aiClient
-        .from('place_destination')
-        .select('id, place_name, latitude, longitude, place_image_folder');
+    final List locationData = await aiClient.from('place_destination').select(
+        'id, place_name, latitude, longitude, place_image_folder, place_label');
     if (locationData.isNotEmpty) {
       listPlace
           .assignAll(locationData.map((e) => PlaceModel.fromJson(e)).toList());
@@ -453,7 +468,7 @@ class MapScreenController extends GetxController
       if (response.isNotEmpty) {
         final placeData = PlaceResponse.fromJson(response.first);
         if (placeData.listData != null) {
-          placeGeneratedStatus.value = EPlaceGenerated.GENERATED;
+          placeGeneratedStatus.value = EPlaceGeneratedStatus.GENERATED;
           isLoading.value = false;
 
           final _listDataGenerated = placeData.listData ?? [];
@@ -485,7 +500,7 @@ class MapScreenController extends GetxController
         if (tempData['generatedPlaces'] != null) {
           final places = tempData['generatedPlaces'] as List<PlaceModel>;
           listPlaceGenerated = places;
-          placeGeneratedStatus.value = EPlaceGenerated.GENERATED;
+          placeGeneratedStatus.value = EPlaceGeneratedStatus.GENERATED;
           Logger().i('Restored generated places from storage');
         }
 
@@ -521,7 +536,7 @@ class MapScreenController extends GetxController
       if (tempData['generatedPlaces'] != null) {
         final places = tempData['generatedPlaces'] as List<PlaceModel>;
         listPlaceGenerated = places;
-        placeGeneratedStatus.value = EPlaceGenerated.GENERATED;
+        placeGeneratedStatus.value = EPlaceGeneratedStatus.GENERATED;
         Logger().i('Restored generated places after login');
       }
 
@@ -860,7 +875,7 @@ class MapScreenController extends GetxController
 
   void clearGeneratedPlaces() {
     listPlaceGenerated.clear();
-    placeGeneratedStatus.value = EPlaceGenerated.HOLD;
+    placeGeneratedStatus.value = EPlaceGeneratedStatus.HOLD;
     messageGenerated.value = "";
     isShowTextfield.value = true;
     isProcessing.value = false;

@@ -1,4 +1,3 @@
-import 'dart:nativewrappers/_internal/vm/lib/ffi_patch.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -180,29 +179,6 @@ class _ChipLabel extends GetView<MapScreenController> {
   }
 }
 
-// labels.map((label) {
-//     if (label.isActive == false) {
-//       return const SizedBox.shrink();
-//     }
-
-//     return ActionChip(
-//       onPressed: () => controller.onSelectLabel(label),
-//       label: Text(label.labelName ?? ""),
-//       backgroundColor: isSelected.id == label.id
-//           ? context.theme.primaryColor.withAlpha(100).withBlue(250)
-//           : context.theme.cardColor,
-//       shape: RoundedRectangleBorder(
-//         borderRadius: BorderRadius.circular(20),
-//         side: BorderSide(
-//           color: isSelected.id == label.id
-//               ? Colors.transparent
-//               : Colors.grey,
-//           width: 0.2,
-//         ),
-//       ),
-//     );
-//   }).toList(),
-
 class _SearchTextField extends GetView<MapScreenController> {
   @override
   Widget build(BuildContext context) {
@@ -277,7 +253,8 @@ class _PlaceCardPanel extends GetView<MapScreenController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.placeGeneratedStatus.value != EPlaceGenerated.GENERATED) {
+      if (controller.placeGeneratedStatus.value !=
+          EPlaceGeneratedStatus.GENERATED) {
         return const SizedBox.shrink();
       }
 
@@ -420,7 +397,7 @@ class _InfoPlacePanel extends GetView<MapScreenController> {
     return Obx(
       () {
         if (controller.placeGeneratedStatus.value !=
-            EPlaceGenerated.GENERATED) {
+            EPlaceGeneratedStatus.GENERATED) {
           return const SizedBox.shrink();
         }
         return Positioned(
@@ -634,9 +611,12 @@ class _MarkerPlace extends GetView<MapScreenController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final List<PlaceModel> places =
-          controller.placeGeneratedStatus.value == EPlaceGenerated.GENERATED
-              ? controller.listPlaceGenerated
+      final List<PlaceModel> places = controller.placeGeneratedStatus.value ==
+              EPlaceGeneratedStatus.GENERATED
+          ? controller.listPlaceGenerated
+          : controller.placeGeneratedStatus.value ==
+                  EPlaceGeneratedStatus.FILTERED
+              ? controller.listFilter
               : controller.listPlace;
 
       final markers = places

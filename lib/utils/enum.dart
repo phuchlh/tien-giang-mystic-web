@@ -1,52 +1,20 @@
-enum SlidingStatus {
-  hide,
-  showDetail,
-  showCommon,
-}
+// ignore_for_file: constant_identifier_names
 
-enum DataLoadingStatus {
-  pending,
-  loading,
-  loaded,
-  error,
-}
+enum SlidingStatus { hide, showDetail, showCommon }
 
-enum GetImageStatus {
-  pending,
-  loading,
-  loaded,
-  error,
-}
+enum DataLoadingStatus { pending, loading, loaded, error }
 
-enum ApiMethod {
-  GET,
-  POST,
-  PUT,
-  DELETE,
-}
+enum GetImageStatus { pending, loading, loaded, error }
 
-enum EBaseURLType {
-  N8N_TEST,
-  N8N_PROD,
-  SUPABASE,
-  SERPER_NEWS,
-  SERPER_PLACES,
-}
+enum ApiMethod { GET, POST, PUT, DELETE }
 
-enum EN8NWebhookType {
-  TEST,
-  PROD,
-}
+enum EBaseURLType { N8N_TEST, N8N_PROD, SUPABASE, SERPER_NEWS, SERPER_PLACES }
 
-enum EPlaceGenerated {
-  HOLD,
-  GENERATED,
-}
+enum EN8NWebhookType { TEST, PROD }
 
-enum EButtonClickType {
-  NEXT,
-  BACK,
-}
+enum EPlaceGeneratedStatus { HOLD, GENERATED, FILTERED }
+
+enum EButtonClickType { NEXT, BACK }
 
 enum EPlayType { INIT, GENERATING, PLAY, PAUSE, STOP }
 
