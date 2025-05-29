@@ -72,6 +72,10 @@ class MapScreenController extends GetxController
   final Rx<LabelModel> selectedLabel = LabelModel().obs;
   final List<PlaceModel> listDetailPlaceBookmark = <PlaceModel>[].obs;
   final List<BookmarkTourModel> listTourBookmark = <BookmarkTourModel>[].obs;
+  final Rx<EStatusTourBookmark> statusTourBookmark =
+      EStatusTourBookmark.HOLD.obs;
+  final Rx<EStatusPlaceBookmark> statusPlaceBookmark =
+      EStatusPlaceBookmark.HOLD.obs;
 
   final TextEditingController promptController = TextEditingController();
   final RxList<String> suggestions = <String>[].obs;
@@ -198,6 +202,10 @@ class MapScreenController extends GetxController
   }
 
   void onSelectLabel(LabelModel label) {
+    if (label.id == selectedLabel.value.id) {
+      selectedLabel.value = LabelModel(); // Deselect if already selected
+      return;
+    }
     selectedLabel.value = label;
   }
 
@@ -869,20 +877,24 @@ class MapScreenController extends GetxController
         AppLogger.error('User not logged in');
         return;
       }
+      statusPlaceBookmark.value = EStatusPlaceBookmark.LOADING;
+
       final listPlace = await businessClient
           .from('saved_locations')
           .select('created_at, locations (*)')
           .eq('user_id', user.id);
 
       if (listPlace.isNotEmpty) {
-        print("List place: $listPlace");
+        statusPlaceBookmark.value = EStatusPlaceBookmark.SUCCESS;
         listDetailPlaceBookmark.assignAll(
             listPlace.map((e) => PlaceModel.fromJson(e['locations'])).toList());
       } else if (listPlace.isEmpty) {
-        print("No bookmark place found");
+        statusPlaceBookmark.value = EStatusPlaceBookmark.EMPTY;
+        AppLogger.info("No bookmark place found");
       }
     } catch (e) {
       AppLogger.error('Error fetching bookmark place: $e');
+      statusPlaceBookmark.value = EStatusPlaceBookmark.ERROR;
     }
   }
 
@@ -893,19 +905,21 @@ class MapScreenController extends GetxController
         AppLogger.error('User not logged in');
         return;
       }
+      statusTourBookmark.value = EStatusTourBookmark.LOADING;
       final listTour = await businessClient
           .from('likes')
           .select('json_location')
           .eq('user_id', user.id);
 
       if (listTour.isNotEmpty) {
+        statusTourBookmark.value = EStatusTourBookmark.SUCCESS;
         listTourBookmark.assignAll(
             listTour.map((e) => BookmarkTourModel.fromJson(e)).toList());
       } else if (listPlace.isEmpty) {
-        print("No bookmark place found");
+        statusTourBookmark.value = EStatusTourBookmark.EMPTY;
       }
     } catch (e) {
-      AppLogger.error('Error fetching bookmark tour: $e');
+      statusTourBookmark.value = EStatusTourBookmark.ERROR;
     }
   }
 

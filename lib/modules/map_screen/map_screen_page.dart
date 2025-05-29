@@ -1,3 +1,4 @@
+import 'dart:nativewrappers/_internal/vm/lib/ffi_patch.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -128,36 +129,79 @@ class _ChipLabel extends GetView<MapScreenController> {
         right: 0,
         child: Align(
           alignment: Alignment.center,
-          child: Wrap(
-            spacing: 8.0,
-            children: labels.map((label) {
-              if (label.isActive == false) {
-                return const SizedBox.shrink();
-              }
+          child: SizedBox(
+            width: Get.width * 0.6,
+            height: 50,
+            child: ScrollConfiguration(
+              behavior: const MaterialScrollBehavior().copyWith(
+                dragDevices: {
+                  PointerDeviceKind.touch,
+                  PointerDeviceKind.mouse,
+                  PointerDeviceKind.trackpad,
+                },
+              ),
+              child: ListView.builder(
+                itemBuilder: (context, index) {
+                  final label = labels[index];
+                  if (label.isActive == false) {
+                    return const SizedBox.shrink();
+                  }
 
-              return ActionChip(
-                onPressed: () => controller.onSelectLabel(label),
-                label: Text(label.labelName ?? ""),
-                backgroundColor: isSelected.id == label.id
-                    ? context.theme.primaryColor.withAlpha(100).withBlue(250)
-                    : context.theme.cardColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  side: BorderSide(
-                    color: isSelected.id == label.id
-                        ? Colors.transparent
-                        : Colors.grey,
-                    width: 0.2,
-                  ),
-                ),
-              );
-            }).toList(),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: ActionChip(
+                      onPressed: () => controller.onSelectLabel(label),
+                      label: Text(label.labelName ?? ""),
+                      backgroundColor: isSelected.id == label.id
+                          ? context.theme.primaryColor
+                              .withAlpha(100)
+                              .withBlue(250)
+                          : context.theme.cardColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(
+                          color: isSelected.id == label.id
+                              ? Colors.transparent
+                              : Colors.grey,
+                          width: 0.2,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                itemCount: labels.length,
+                scrollDirection: Axis.horizontal,
+              ),
+            ),
           ),
         ),
       );
     });
   }
 }
+
+// labels.map((label) {
+//     if (label.isActive == false) {
+//       return const SizedBox.shrink();
+//     }
+
+//     return ActionChip(
+//       onPressed: () => controller.onSelectLabel(label),
+//       label: Text(label.labelName ?? ""),
+//       backgroundColor: isSelected.id == label.id
+//           ? context.theme.primaryColor.withAlpha(100).withBlue(250)
+//           : context.theme.cardColor,
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.circular(20),
+//         side: BorderSide(
+//           color: isSelected.id == label.id
+//               ? Colors.transparent
+//               : Colors.grey,
+//           width: 0.2,
+//         ),
+//       ),
+//     );
+//   }).toList(),
 
 class _SearchTextField extends GetView<MapScreenController> {
   @override

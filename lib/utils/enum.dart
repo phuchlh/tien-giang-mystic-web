@@ -51,3 +51,9 @@ enum EButtonClickType {
 enum EPlayType { INIT, GENERATING, PLAY, PAUSE, STOP }
 
 enum EDrawerTypeButton { HOLD, PLACE, TOUR, LOGOUT }
+
+enum EStatusTourBookmark { HOLD, LOADING, SUCCESS, ERROR, EMPTY }
+
+enum EStatusPlaceBookmark { HOLD, LOADING, SUCCESS, ERROR, EMPTY }
+
+enum ECommonStatus { HOLD, LOADING, SUCCESS, ERROR, EMPTY }

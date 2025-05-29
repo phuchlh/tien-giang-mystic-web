@@ -5,15 +5,17 @@ import 'package:get/get.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/material_symbols.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:tien_giang_mystic/models/bookmark_tour_model.dart';
-import 'package:tien_giang_mystic/models/place_model.dart';
-import 'package:tien_giang_mystic/modules/map_screen/widgets/dialog_detail.dart';
-import 'package:tien_giang_mystic/utils/constant.dart';
-import 'package:tien_giang_mystic/utils/enum.dart';
 
+import '../../../components/animated_status_widget.dart';
+import '../../../models/bookmark_tour_model.dart';
+import '../../../models/place_model.dart';
+import '../../../utils/constant.dart';
+import '../../../utils/enum.dart';
 import '../../../utils/gap.dart';
+import '../../../utils/images.dart';
 import '../../auth/auth_controller.dart';
 import '../map_screen_controller.dart';
+import 'dialog_detail.dart';
 
 class DrawerContentWidget extends GetView<MapScreenController> {
   final String title;
@@ -85,25 +87,47 @@ class _PlaceBookmarkWidget extends GetView<MapScreenController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final listBookmark = controller.listDetailPlaceBookmark;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _TitleWidget(title: title),
-          Gap(k10),
-          Expanded(
-            child: ListView.builder(
-              itemCount: listBookmark.length,
-              itemBuilder: (_, index) {
-                final place = listBookmark[index];
-                return _PlaceBookmarkItem(place: place);
-              },
-            ),
-          ),
-        ],
-      );
-    });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _TitleWidget(title: title),
+        Gap(k10),
+        Expanded(
+          child: Obx(() {
+            final listBookmark = controller.listDetailPlaceBookmark;
+            switch (controller.statusPlaceBookmark.value) {
+              case EStatusPlaceBookmark.LOADING:
+                return AnimatedStatusWidget(
+                  animated: Images.loading,
+                  message: 'Đang tải...',
+                );
+              case EStatusPlaceBookmark.ERROR:
+                return AnimatedStatusWidget(
+                  animated: Images.noData,
+                  message: 'Đã xảy ra lỗi, vui lòng thử lại',
+                );
+              case EStatusPlaceBookmark.EMPTY:
+                return AnimatedStatusWidget(
+                  animated: Images.noData,
+                  message: 'Chưa có địa điểm nào được lưu',
+                );
+              case EStatusPlaceBookmark.SUCCESS:
+                return ListView.builder(
+                  itemCount: listBookmark.length,
+                  itemBuilder: (_, index) {
+                    final place = listBookmark[index];
+                    return _PlaceBookmarkItem(place: place);
+                  },
+                );
+              case EStatusPlaceBookmark.HOLD:
+                return const Center(
+                  child: Text('Vui lòng thử lại'),
+                );
+            }
+          }),
+        ),
+      ],
+    );
   }
 }
 
@@ -197,13 +221,38 @@ class _TourBookmarkWidget extends GetView<MapScreenController> {
         _TitleWidget(title: title),
         Gap(k10),
         Expanded(
-            child: ListView.builder(
-          itemCount: controller.listTourBookmark.length,
-          itemBuilder: (_, index) {
-            final tour = controller.listTourBookmark[index];
-            return _TourBookmarkItem(place: tour);
-          },
-        )),
+          child: Obx(() {
+            switch (controller.statusTourBookmark.value) {
+              case EStatusTourBookmark.LOADING:
+                return AnimatedStatusWidget(
+                  animated: Images.loading,
+                  message: 'Đang tải...',
+                );
+              case EStatusTourBookmark.ERROR:
+                return AnimatedStatusWidget(
+                  animated: Images.noData,
+                  message: 'Đã xảy ra lỗi, vui lòng thử lại',
+                );
+              case EStatusTourBookmark.EMPTY:
+                return AnimatedStatusWidget(
+                  animated: Images.noData,
+                  message: 'Chưa có địa điểm nào được lưu',
+                );
+              case EStatusTourBookmark.SUCCESS:
+                return ListView.builder(
+                  itemCount: controller.listTourBookmark.length,
+                  itemBuilder: (_, index) {
+                    final tour = controller.listTourBookmark[index];
+                    return _TourBookmarkItem(place: tour);
+                  },
+                );
+              case EStatusTourBookmark.HOLD:
+                return const Center(
+                  child: Text('Vui lòng thử lại'),
+                );
+            }
+          }),
+        ),
       ],
     );
   }
@@ -252,19 +301,22 @@ class _TourBookmarkItem extends GetView<MapScreenController> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(90),
-                color: Colors.grey.shade200,
+            CachedNetworkImage(
+              imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
-              child: CachedNetworkImage(
-                imageUrl: 'https://i.imgur.com/EC4eUSz.jpeg',
-                width: k150,
-                height: k150,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => CircularProgressIndicator(),
-                errorWidget: (context, url, error) => Icon(Icons.error),
-              ),
+              imageUrl: 'https://i.imgur.com/EC4eUSz.jpeg',
+              width: k150,
+              height: k150,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
             ),
             Gap(k10),
             Expanded(
